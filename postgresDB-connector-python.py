@@ -67,6 +67,3 @@ if __name__ == '__main__':
     conn = connect()
 
     selectAll(conn, "students")
-
-
-
