@@ -1,6 +1,7 @@
 import json
 import psycopg2
 import os
+import time
 
 # Database connection parameters
 db_params = {
@@ -18,12 +19,14 @@ def insert_or_ignore(cursor, table, columns, values):
     query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(['%s' for _ in values])}) ON CONFLICT DO NOTHING"
     cursor.execute(query, values)
 
-
-def insert_data(data):
+def insert_data(match_id, data):
 
     # Connect to the PostgreSQL database
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
+
+    # Insert match
+    insert_or_ignore(cursor, 'match', ['match_id'], (match_id,))
 
     # Iterate through JSON data and insert into tables
     for team_data in data:
@@ -32,7 +35,7 @@ def insert_data(data):
         team_name = team_data['team_name']
         
         # Insert team
-        insert_or_ignore(cursor, 'team', ['team_id', 'team_name'], (team_id, team_name), 'team_id')
+        insert_or_ignore(cursor, 'team', ['team_id', 'team_name'], (team_id, team_name))
 
         # Insert lineup data
         lineup = team_data.get('lineup', [])
@@ -45,50 +48,44 @@ def insert_data(data):
 
             # Insert player
             insert_or_ignore(cursor, 'player', ['player_id', 'player_name', 'player_nickname', 'jersey_number', 'country_name'], (player_id, player_name, player_nickname, jersey_number, country_name))
+            
+            # Insert lineup relationship
+            insert_or_ignore(cursor, 'lineup', ['match_id', 'team_id', 'player_id'], (match_id, team_id, player_id))
 
             # Insert positions
             positions = player_data.get('positions', [])
             for position_data in positions:
-                position_id = position_data['position_id']
-                position = position_data['position']
-                from_time = position_data['from']
-                to_time = position_data['to']
-                from_period = position_data['from_period']
-                to_period = position_data['to_period']
-                start_reason = position_data['start_reason']
-                end_reason = position_data['end_reason']
+                position_id = position_data.get('position_id', None)
+                position = position_data.get('position', None)
+                from_time = position_data.get('from', None)
+                to_time = position_data.get('to', None)
+                from_period = position_data.get('from_period', None)
+                to_period = position_data.get('to_period', None)
+                start_reason = position_data.get('start_reason', None)
+                end_reason = position_data.get('end_reason', None)
 
-                insert_or_ignore(cursor, 'position', ['position_id', 'position', 'from_time', 'to_time', 'from_period', 'to_period', 'start_reason', 'end_reason'], 
-                                  (position_id, position, from_time, to_time, from_period, to_period, start_reason, end_reason))
-
-                # Insert lineup entry
-                insert_or_ignore(cursor, 'lineup', ['player_id', 'position_id'], (player_id, position_id))
+                insert_or_ignore(cursor, 'position', ['position_id', 'player_id', 'match_id', 'position', 'from_time', 'to_time', 'from_period', 'to_period', 'start_reason', 'end_reason'], 
+                                  (position_id, player_id, match_id, position, from_time, to_time, from_period, to_period, start_reason, end_reason))
         
             # Insert cards
             cards = player_data.get('cards', [])
             for card_data in cards:
-                card_time = card_data['time']
-                card_type = card_data['card_type']
-                card_reason = card_data['reason']
-                card_period = card_data['period']
+                card_time = card_data.get('time', None)
+                card_type = card_data.get('card_type', None)
+                card_reason = card_data.get('reason', None)
+                card_period = card_data.get('period', None)
 
-                insert_or_ignore(cursor, 'card', ['card_time', 'card_type', 'card_reason', 'card_period'], (card_time, card_type, card_reason, card_period))
-
-                # Get card_id for lineup entry
-                cursor.execute("SELECT card_id FROM card WHERE card_time = %s AND card_type = %s AND card_reason = %s AND card_period = %s", (card_time, card_type, card_reason, card_period))
-                card_id = cursor.fetchone()[0]
-
-                # Update lineup entry with card_id
-                cursor.execute("UPDATE lineup SET card_id = %s WHERE player_id = %s", (card_id, player_id))
+                insert_or_ignore(cursor, 'card', ['player_id', 'match_id', 'card_time', 'card_type', 'card_reason', 'card_period'], (player_id, match_id, card_time, card_type, card_reason, card_period))
 
     # Commit changes and close connection
     conn.commit()
     conn.close()
 
 if __name__ == '__main__':
+    start = time.time()
     for file in os.listdir("data/lineups"):
         if file.endswith(".json"):
             with open(os.path.join("data/lineups", file)) as f:
                 data = json.load(f)
-                print(f"Inserting data from {file}...")
-                insert_data(data)
+                insert_data(file.split('.')[0], data)
+    print(f"Time taken for matches: {time.time() - start:.2f} seconds")

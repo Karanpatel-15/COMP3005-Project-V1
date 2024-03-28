@@ -17,13 +17,6 @@ def insert_or_ignore(cursor, table, columns, values):
     """
     query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(['%s' for _ in values])}) ON CONFLICT DO NOTHING"
     cursor.execute(query, values)
-
-def insert_connector_data(cursor, table, fk1, fk2, fk1_name, fk2_name):
-    """
-    Insert data into the connector table.
-    """
-    query = f"INSERT INTO {table} ({fk1_name}, {fk2_name}) SELECT {fk1}, {fk2} WHERE NOT EXISTS ( SELECT 1 FROM {table} WHERE {fk1_name} = {fk1} AND {fk2_name} = {fk2})  ON CONFLICT DO NOTHING;"
-    cursor.execute(query)
     
 
 def insert_manager(cursor, manager):
@@ -48,11 +41,12 @@ def insert_team_manager(cursor, team_id, manager_id):
 
 def insert_match_data(competition_id, season_id, data):
 
+    # Connect to the PostgreSQL database
+    conn = psycopg.connect(**db_params)
+    cursor = conn.cursor()
+    
     # Iterate through JSON data and insert into tables
     for match in data:
-        # Connect to the PostgreSQL database
-        conn = psycopg.connect(**db_params)
-        cursor = conn.cursor()
 
         # Insert competition data
         competition_name = match.get('competition', {}).get('competition_name', None)
@@ -121,13 +115,14 @@ def insert_match_data(competition_id, season_id, data):
         if 'managers' in match['home_team']:
             for manager in match['home_team']['managers']:
                 insert_manager(cursor, manager)
-                insert_connector_data(cursor, 'team_manager', match['home_team']['home_team_id'], manager['id'], 'team_id', 'manager_id')
+                insert_or_ignore(cursor, 'team_manager', ['team_id', 'manager_id'], (match['home_team']['home_team_id'], manager['id']))
+
 
         # Insert manager data for away team
         if 'managers' in match['away_team']:
             for manager in match['away_team']['managers']:
                 insert_manager(cursor, manager)
-                insert_connector_data(cursor, 'team_manager', match['away_team']['away_team_id'], manager['id'], 'team_id', 'manager_id')
+                insert_or_ignore(cursor, 'team_manager', ['team_id', 'manager_id'], (match['away_team']['away_team_id'], manager['id']))
 
         # Insert match data
         match_data = (
@@ -144,17 +139,17 @@ def insert_match_data(competition_id, season_id, data):
             match['match_week'] if 'match_week' in match else None,
             match['competition_stage']['name'] if 'competition_stage' in match else None
         )
-        insert_or_ignore(cursor, 'matches', ['match_id', 'match_date', 'kick_off', 'stadium_id', 'referee_id', 'home_team_id', 'away_team_id', 'home_score', 'away_score', 'match_status', 'match_week', 'competition_stage'], match_data)
+        insert_or_ignore(cursor, 'match', ['match_id', 'match_date', 'kick_off', 'stadium_id', 'referee_id', 'home_team_id', 'away_team_id', 'home_score', 'away_score', 'match_status', 'match_week', 'competition_stage'], match_data)
 
         # Insert competition_season
-        insert_connector_data(cursor, 'competition_season', competition_id, season_id, 'competition_id', 'season_id')
+        insert_or_ignore(cursor, 'competition_season', ['competition_id', 'season_id'], (competition_id, season_id))
         
-        # Insert season_matches
-        insert_connector_data(cursor, 'season_matches', season_id, match['match_id'], 'season_id', 'match_id')
+        # Insert season_match
+        insert_or_ignore(cursor, 'season_match', ['season_id', 'match_id'], (season_id, match['match_id']))
         
-        # Commit changes and close connection
-        conn.commit()
-        conn.close()
+    # Commit changes and close connection
+    conn.commit()
+    conn.close()
     
 
 if __name__ == '__main__':

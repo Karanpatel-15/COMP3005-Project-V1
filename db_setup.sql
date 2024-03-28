@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS competition_season (
     competition_id INTEGER, -- Foreign Key
     season_id INTEGER, -- Foreign Key
     FOREIGN KEY (competition_id) REFERENCES competition(competition_id),
-    FOREIGN KEY (season_id) REFERENCES season(season_id)
+    FOREIGN KEY (season_id) REFERENCES season(season_id),
+    UNIQUE (competition_id, season_id)
 );
 
 CREATE TABLE IF NOT EXISTS stadium (
@@ -46,7 +47,7 @@ CREATE TABLE IF NOT EXISTS team (
     country_name VARCHAR(50)
 );
 
-CREATE TABLE IF NOT EXISTS matches (
+CREATE TABLE IF NOT EXISTS match (
     match_id INTEGER PRIMARY KEY,
     match_date DATE,
     kick_off TIME,
@@ -65,91 +66,82 @@ CREATE TABLE IF NOT EXISTS matches (
     FOREIGN KEY (away_team_id) REFERENCES team(team_id)
 );
 
-CREATE TABLE IF NOT EXISTS season_matches (
+CREATE TABLE IF NOT EXISTS season_match (
     season_id INTEGER, -- Foreign Key
     match_id INTEGER PRIMARY KEY,
     FOREIGN KEY (season_id) REFERENCES season(season_id),
-    FOREIGN KEY (match_id) REFERENCES matches(match_id)
+    FOREIGN KEY (match_id) REFERENCES match(match_id),
+    UNIQUE (season_id, match_id)
 );
 
 CREATE TABLE IF NOT EXISTS team_manager (
     team_id INTEGER, -- Foreign Key
     manager_id INTEGER, -- Foreign Key
     FOREIGN KEY (team_id) REFERENCES team(team_id),
-    FOREIGN KEY (manager_id) REFERENCES manager(manager_id)
-);
-
-CREATE TABLE IF NOT EXISTS position (
-    position_id INTEGER PRIMARY KEY,
-    position VARCHAR(100),
-    from_time TIME,
-    to_time TIME,
-    from_period INTEGER,
-    to_period INTEGER,
-    start_reason VARCHAR(100),
-    end_reason VARCHAR(100)
-);
-
-CREATE TABLE IF NOT EXISTS card (
-    card_id INTEGER PRIMARY KEY,
-    card_time TIME,
-    card_type VARCHAR(100),
-    card_reason VARCHAR(100),
-    card_period INTEGER
+    FOREIGN KEY (manager_id) REFERENCES manager(manager_id),
+    UNIQUE (team_id, manager_id)
 );
 
 CREATE TABLE IF NOT EXISTS player (
     player_id INTEGER PRIMARY KEY,
-    player_name VARCHAR(100),
-    player_nickname VARCHAR(100),
+    player_name VARCHAR(255),
+    player_nickname VARCHAR(255),
     jersey_number INTEGER,
-    country_name VARCHAR(50)
+    country_name VARCHAR(255)
 );
 
+-- Create Lineup table
 CREATE TABLE IF NOT EXISTS lineup (
-    lineup_id INTEGER PRIMARY KEY,
-    player_id INTEGER, 
-    card_id INTEGER,
-    position_id INTEGER,
-    FOREIGN KEY (player_id) REFERENCES player(player_id),
-    FOREIGN KEY (position_id) REFERENCES position(position_id),
-    FOREIGN KEY (card_id) REFERENCES card(card_id)
-);
-
-CREATE TABLE IF NOT EXISTS team_lineup (
-    team_id INTEGER, -- Foreign Key
-    lineup_id INTEGER PRIMARY KEY,
+    match_id INTEGER,
+    team_id INTEGER,
+    player_id INTEGER,
+    FOREIGN KEY (match_id) REFERENCES match(match_id),
     FOREIGN KEY (team_id) REFERENCES team(team_id),
-    FOREIGN KEY (lineup_id) REFERENCES lineup(lineup_id)
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    UNIQUE (match_id, team_id, player_id)
 );
 
--- Drop the tables
--- DROP TABLE IF EXISTS team_lineup;
--- DROP TABLE IF EXISTS lineup;
--- DROP TABLE IF EXISTS player;
--- DROP TABLE IF EXISTS card;
--- DROP TABLE IF EXISTS position;
--- DROP TABLE IF EXISTS team_manager;
--- DROP TABLE IF EXISTS matches;
--- DROP TABLE IF EXISTS season_matches;
--- DROP TABLE IF EXISTS team;
--- DROP TABLE IF EXISTS stadium;
--- DROP TABLE IF EXISTS referee;
--- DROP TABLE IF EXISTS competition;
--- DROP TABLE IF EXISTS manager;
--- DROP TABLE IF EXISTS season;
+-- Create Position table
+CREATE TABLE IF NOT EXISTS position (
+    position_id INTEGER PRIMARY KEY,
+    player_id INTEGER,
+    match_id INTEGER,
+    position VARCHAR(255),
+    from_time VARCHAR(10),
+    to_time VARCHAR(10),
+    from_period INTEGER,
+    to_period INTEGER,
+    start_reason VARCHAR(255),
+    end_reason VARCHAR(255),
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (match_id) REFERENCES match(match_id)
+);
 
+-- Create Card table
+CREATE TABLE IF NOT EXISTS card (
+    card_id SERIAL PRIMARY KEY,
+    player_id INTEGER,
+    match_id INTEGER,
+    card_time VARCHAR(10),
+    card_type VARCHAR(255),
+    card_reason VARCHAR(255),
+    card_period INTEGER,
+    period INTEGER,
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (match_id) REFERENCES match(match_id)
+);
 
--- SELECT * FROM manager;
--- SELECT * FROM referee;
+-- SELECT * FROM card;
 -- SELECT * FROM competition;
+-- SELECT * FROM competition_season;
+-- SELECT * FROM lineup;
+-- SELECT * FROM manager;
+-- SELECT * FROM match;
+-- SELECT * FROM player;
+-- SELECT * FROM position;
+-- SELECT * FROM referee;
 -- SELECT * FROM season;
+-- SELECT * FROM season_match;
 -- SELECT * FROM stadium;
 -- SELECT * FROM team;
--- SELECT * FROM matches;
 -- SELECT * FROM team_manager;
--- SELECT * FROM position;
--- SELECT * FROM card;
--- SELECT * FROM player;
--- SELECT * FROM lineup;
--- SELECT * FROM team_lineup;
