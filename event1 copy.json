@@ -1,0 +1,53 @@
+{
+  "id": "8312547c-3060-4244-9a7f-4c33f71174ba",
+  "index": 11,
+  "period": 1,
+  "timestamp": "00:00:05.164",
+  "minute": 0,
+  "second": 5,
+  "type": {
+    "id": 30,
+    "name": "Pass"
+  },
+  "possession": 2,
+  "possession_team": {
+    "id": 217,
+    "name": "Barcelona"
+  },
+  "play_pattern": {
+    "id": 9,
+    "name": "From Kick Off"
+  },
+  "team": {
+    "id": 217,
+    "name": "Barcelona"
+  },
+  "player": {
+    "id": 6374,
+    "name": "Nélson Cabral Semedo"
+  },
+  "position": {
+    "id": 2,
+    "name": "Right Back"
+  },
+  "location": [44.0, 67.0],
+  "duration": 1.846,
+  "related_events": ["df1b315f-1585-418c-bf6d-92a6dbb5e6fa"],
+  "pass": {
+    "recipient": {
+      "id": 5213,
+      "name": "Gerard Piqué Bernabéu"
+    },
+    "length": 18.439089,
+    "angle": -2.4329665,
+    "height": {
+      "id": 1,
+      "name": "Ground Pass"
+    },
+    "end_location": [30.0, 55.0],
+    "body_part": {
+      "id": 40,
+      "name": "Right Foot"
+    }
+  }
+}

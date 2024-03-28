@@ -1,6 +1,7 @@
 import json
 import psycopg
 import os
+import time
 
 # Database connection parameters
 db_params = {
@@ -153,6 +154,7 @@ def insert_match_data(competition_id, season_id, data):
     
 
 if __name__ == '__main__':
+    start = time.time()
     for dir in os.listdir("data/matches"):
         if os.path.isdir(os.path.join("data/matches", dir)):
             for file in os.listdir(os.path.join("data/matches", dir)):
@@ -161,3 +163,4 @@ if __name__ == '__main__':
                         data = json.load(f)
                         print(f"Inserting data from competition {dir} and season {file}...")
                         insert_match_data(dir,file.split('.')[0], data)
+    print(f"Time taken: {time.time()-start} seconds")
