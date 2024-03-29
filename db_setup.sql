@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS competition (
 );
 
 CREATE TABLE IF NOT EXISTS competition_season (
-    competition_id INTEGER, -- Foreign Key
-    season_id INTEGER, -- Foreign Key
+    competition_id INTEGER, 
+    season_id INTEGER, 
     FOREIGN KEY (competition_id) REFERENCES competition(competition_id),
     FOREIGN KEY (season_id) REFERENCES season(season_id),
     UNIQUE (competition_id, season_id)
@@ -51,10 +51,10 @@ CREATE TABLE IF NOT EXISTS match (
     match_id INTEGER PRIMARY KEY,
     match_date DATE,
     kick_off TIME,
-    stadium_id INTEGER, -- Foreign Key
-    referee_id INTEGER, -- Foreign Key
-    home_team_id INTEGER, -- Foreign Key
-    away_team_id INTEGER, -- Foreign Key
+    stadium_id INTEGER, 
+    referee_id INTEGER, 
+    home_team_id INTEGER, 
+    away_team_id INTEGER, 
     home_score INTEGER,
     away_score INTEGER,
     match_status VARCHAR(100),
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS match (
 );
 
 CREATE TABLE IF NOT EXISTS season_match (
-    season_id INTEGER, -- Foreign Key
+    season_id INTEGER, 
     match_id INTEGER PRIMARY KEY,
     FOREIGN KEY (season_id) REFERENCES season(season_id),
     FOREIGN KEY (match_id) REFERENCES match(match_id),
@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS season_match (
 );
 
 CREATE TABLE IF NOT EXISTS team_manager (
-    team_id INTEGER, -- Foreign Key
-    manager_id INTEGER, -- Foreign Key
+    team_id INTEGER, 
+    manager_id INTEGER, 
     FOREIGN KEY (team_id) REFERENCES team(team_id),
     FOREIGN KEY (manager_id) REFERENCES manager(manager_id),
     UNIQUE (team_id, manager_id)
@@ -90,7 +90,6 @@ CREATE TABLE IF NOT EXISTS player (
     country_name VARCHAR(255)
 );
 
--- Create Lineup table
 CREATE TABLE IF NOT EXISTS lineup (
     match_id INTEGER,
     team_id INTEGER,
@@ -101,7 +100,6 @@ CREATE TABLE IF NOT EXISTS lineup (
     UNIQUE (match_id, team_id, player_id)
 );
 
--- Create Position table
 CREATE TABLE IF NOT EXISTS position (
     position_id INTEGER PRIMARY KEY,
     player_id INTEGER,
@@ -117,7 +115,6 @@ CREATE TABLE IF NOT EXISTS position (
     FOREIGN KEY (match_id) REFERENCES match(match_id)
 );
 
--- Create Card table
 CREATE TABLE IF NOT EXISTS card (
     card_id SERIAL PRIMARY KEY,
     player_id INTEGER,
@@ -131,17 +128,33 @@ CREATE TABLE IF NOT EXISTS card (
     FOREIGN KEY (match_id) REFERENCES match(match_id)
 );
 
--- SELECT * FROM card;
--- SELECT * FROM competition;
--- SELECT * FROM competition_season;
--- SELECT * FROM lineup;
--- SELECT * FROM manager;
--- SELECT * FROM match;
--- SELECT * FROM player;
--- SELECT * FROM position;
--- SELECT * FROM referee;
--- SELECT * FROM season;
--- SELECT * FROM season_match;
--- SELECT * FROM stadium;
--- SELECT * FROM team;
--- SELECT * FROM team_manager;
+CREATE TABLE IF NOT EXISTS event (
+    event_id UUID PRIMARY KEY,
+    event_index INTEGER,
+    event_period INTEGER,
+    event_timestamp VARCHAR(20),
+    event_minute INTEGER,
+    event_second INTEGER,
+    event_type VARCHAR(100),
+    event_possession INTEGER,
+    event_possession_team_id INTEGER,
+    event_play_pattern VARCHAR(100),
+    event_team_id INTEGER,
+    FOREIGN KEY (event_possession_team_id) REFERENCES team(team_id),
+    FOREIGN KEY (event_team_id) REFERENCES team(team_id)
+);
+
+CREATE TABLE IF NOT EXISTS match_event (
+    match_id INTEGER,
+    event_id UUID,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (match_id) REFERENCES match(match_id),
+    UNIQUE (event_id, match_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_half_start (
+    event_id UUID,
+    event_duration FLOAT,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    UNIQUE (event_id)
+);
