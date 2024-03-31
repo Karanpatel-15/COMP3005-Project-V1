@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg
 import os
 import time
 
@@ -22,7 +22,7 @@ def insert_or_ignore(cursor, table, columns, values):
 def insert_data(match_id, data):
 
     # Connect to the PostgreSQL database
-    conn = psycopg2.connect(**db_params)
+    conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
 
     # Insert match

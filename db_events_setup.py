@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg
 import os
 import time
 
@@ -21,16 +21,16 @@ def insert_or_ignore(cursor, table, columns, values):
 
 def handle_half_start(cursor, event_id, event):
     event_duration = event.get('duration', None)
-    print(event_duration)
     insert_or_ignore(cursor, 'event_half_start', ['event_id', 'event_duration'], [event_id, event_duration])
 
-def handle_half_end(event):
-    print("Half End")
+def handle_half_end(cursor, event_id, event):
+    event_duration = event.get('duration', None)
+    insert_or_ignore(cursor, 'event_half_end', ['event_id', 'event_duration'], [event_id, event_duration])
 
 def insert_data(match_id, data):
 
     # Connect to the PostgreSQL database
-    conn = psycopg2.connect(**db_params)
+    conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
 
     for event in data:
@@ -54,8 +54,6 @@ def insert_data(match_id, data):
         match event_type:
             case "Half Start":
                 handle_half_start(cursor, event_id, event)
-            case "Half End":
-                handle_half_end(event)
 
     # Commit changes and close connection
     conn.commit()

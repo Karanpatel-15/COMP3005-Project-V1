@@ -158,3 +158,10 @@ CREATE TABLE IF NOT EXISTS event_half_start (
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     UNIQUE (event_id)
 );
+
+CREATE TABLE IF NOT EXISTS event_half_end (
+    event_id UUID,
+    event_duration FLOAT,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    UNIQUE (event_id)
+);
