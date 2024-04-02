@@ -21,11 +21,11 @@ def insert_or_ignore(cursor, table, columns, values):
 
 def handle_half_start(cursor, event_id, event):
     event_duration = event.get('duration', None)
-    print(event_duration)
     insert_or_ignore(cursor, 'event_half_start', ['event_id', 'event_duration'], [event_id, event_duration])
 
-def handle_half_end(event):
-    print("Half End")
+def handle_half_end(cursor, event_id, event):
+    event_duration = event.get('duration', None)
+    insert_or_ignore(cursor, 'event_half_end', ['event_id', 'event_duration'], [event_id, event_duration])
 
 def insert_data(match_id, data):
 
