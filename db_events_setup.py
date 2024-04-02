@@ -2,7 +2,7 @@ import json
 import psycopg
 import os
 import time
-
+from eventStratigiesModule import EventStrategyManager
 # Database connection parameters
 db_params = {
     'dbname': 'postgres',
@@ -41,6 +41,7 @@ def insert_data(match_id, data):
         event_minute = event.get('minute', None)
         event_second = event.get('second', None)
         event_type = event.get('type', None).get('name', None)
+        event_typeId = event.get('type', None).get('id', None)
         event_possession = event.get('possession', None)
         event_possession_team_id = event.get('possession_team', None).get('id', None)
         event_play_pattern = event.get('play_pattern', None).get('name', None)
@@ -49,11 +50,11 @@ def insert_data(match_id, data):
         # Insert event into the table
         insert_or_ignore(cursor, 'event', ['event_id', 'event_index', 'event_period', 'event_timestamp', 'event_minute', 'event_second', 'event_type', 'event_possession', 'event_possession_team_id', 'event_play_pattern', 'event_team_id'], [event_id, event_index, event_period, event_timestamp, event_minute, event_second, event_type, event_possession, event_possession_team_id, event_play_pattern, event_team_id])
         insert_or_ignore(cursor, 'match_event', ['match_id', 'event_id'], [match_id, event_id])
-
+        eventStratigieManager = EventStrategyManager.EventStrategyManager()
         #switch case for different event types
-        match event_type:
-            case "Half Start":
-                handle_half_start(cursor, event_id, event)
+        print(event_typeId)
+        eventStratigieManager.get_strategy_by_id(event_typeId)
+
 
     # Commit changes and close connection
     conn.commit()
