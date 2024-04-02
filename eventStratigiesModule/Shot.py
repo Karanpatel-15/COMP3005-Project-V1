@@ -1,8 +1,6 @@
 
 
-class Shot:
-    id = 10
-    def __init__(self):
-        pass
+id = 10
+class Strategy:
     def handle(self,payload):
         print("Inserting Shot  " + payload)

@@ -1,10 +1,10 @@
-from Shot import Shot
+from eventStratigiesModule import Shot
 
 
 class EventStrategyManager:
     def __init__(self):
         self._strategies = {
-            Shot.id: Shot()
+            Shot.id: Shot.Strategy()
         }
         self._strategy = None
 
@@ -13,4 +13,4 @@ class EventStrategyManager:
         if self._strategy is None:
             raise ValueError("Invalid strategy ID ", strategy_id)
         return self._strategy
-    
+

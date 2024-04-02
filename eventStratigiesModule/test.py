@@ -1,4 +1,3 @@
-from Shot import Shot
 from EventStrategyManager import EventStrategyManager
 
 if __name__ == '__main__':
