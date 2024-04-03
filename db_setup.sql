@@ -165,3 +165,11 @@ CREATE TABLE IF NOT EXISTS event_half_end (
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     UNIQUE (event_id)
 );
+
+-- ___________ Rayyan ___________ (5050 to Duel)
+
+
+-- ___________ Karan ___________  (Error to Offside)
+
+
+-- ___________ Arhaan ___________ (Own Goal to Tactical Shift)
