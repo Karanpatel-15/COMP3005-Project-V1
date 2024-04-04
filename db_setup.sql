@@ -338,3 +338,231 @@ CREATE TABLE IF NOT EXISTS event_offside (
 
 
 -- ___________ Arhaan ___________ (Own Goal to Tactical Shift)
+
+CREATE TABLE IF NOT EXISTS own_goal_against (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_team_id INTEGER,
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_team_id) REFERENCES team(team_id),
+    FOREIGN KEY (event_position) REFERENCES position(position_id),
+    UNIQUE (event_id)
+); 
+
+CREATE TABLE IF NOT EXISTS own_goal_for (
+    event_id UUID PRIMARY KEY,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_team_id INTEGER,
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_team_id) REFERENCES team(team_id),
+    FOREIGN KEY (event_position) REFERENCES position(position_id),
+    UNIQUE (event_id)
+); 
+
+CREATE TABLE IF NOT EXISTS pass(
+    recipient_id INTEGER,
+    length FLOAT,
+    angle FLOAT,
+    height FLOAT,
+    end_location_x FLOAT,
+    end_location_y FLOAT,
+    event_body_part VARCHAR(100),
+    event_outcome VARCHAR(100),
+    event_aerial_won BOOLEAN,
+    event_assisted_shot_id INTEGER,
+    event_shot_assist BOOLEAN, 
+    event_switch BOOLEAN,
+    event_cross BOOLEAN,
+    event_deflected BOOLEAN,
+    event_inswinging BOOLEAN,
+    event_technique VARCHAR(100),
+    event_through_ball BOOLEAN,
+    event_no_touch BOOLEAN,
+    event_miscommunication BOOLEAN,
+    event_outswinging BOOLEAN,
+    event_cut_back BOOLEAN,
+    event_goal_assist BOOLEAN,
+    event_straight BOOLEAN,
+    Foreign Key (recipient_id) References player(player_id),
+    Foreign Key (event_assisted_shot_id) References shot (shot_id),
+    UNIQUE (recipient_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_passes(
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    pass_id INTEGER,
+    event_under_pressure BOOLEAN,
+    event_off_camera BOOLEAN,
+    event_counterpress BOOLEAN,
+    event_out BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (pass_id) REFERENCES pass(pass_id),
+    UNIQUE (event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_playerOff (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    event_off_camera BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_playerOn (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    event_off_camera BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_pressure(
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    event_counterpress BOOLEAN, 
+    event_under_pressure BOOLEAN,
+    event_off_camera BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_refereeBallDrop (
+    event_id UUID,
+    event_duration FLOAT,
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_off_camera BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    UNIQUE (event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_shield (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_possession_team_id INTEGER,
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    event_under_pressure BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_possession_team_id) REFERENCES team(team_id),
+    UNIQUE (event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_shot (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_team_id INTEGER,
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    event_out BOOLEAN,
+    event_under_pressure BOOLEAN,
+    event_off_camera BOOLEAN,
+    events_statsbomb_xg FLOAT,
+    end_location_x FLOAT,
+    end_location_y FLOAT,
+    event_body_part VARCHAR(100),
+    event_outcome VARCHAR(100),
+    event_first_time BOOLEAN,
+    event_technique VARCHAR(100),
+    event_deflected BOOLEAN,
+    event_one_on_one BOOLEAN,
+    event_aerial_won BOOLEAN,
+    event_saved_to_post BOOLEAN,
+    event_redirect BOOLEAN,
+    event_open_goal BOOLEAN,
+    event_follows_dribble BOOLEAN,
+    event_saved_off_target BOOLEAN,
+    event_freeze_frame_id INTEGER,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_team_id) REFERENCES team(team_id),
+    FOREIGN KEY (event_freeze_frame_id) REFERENCES freeze_frame(freeze_frame_id),
+    UNIQUE (event_id)   
+);
+
+CREATE TABLE IF NOT EXISTS freeze_frame (
+    freeze_frame_id SERIAL PRIMARY KEY,
+    event id UUID,
+    event_player INTEGER,
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_position VARCHAR(100),
+    event_teammate BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
+--not sure about this about line up
+CREATE TABLE IF NOT EXISTS event_startingXI (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_formations INTEGER,
+    event_lineup INTEGER,
+    event_jersey_number INTEGER,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_substitution (
+    event_id UUID,
+    event_player_out INTEGER,
+    event_player_replacement INTEGER,
+    event_timestamp VARCHAR(20),
+    event_duration FLOAT,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player_out) REFERENCES player(player_id),
+    FOREIGN KEY (event_player_replacement) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
+--not sure about this about line up
+CREATE TABLE IF NOT EXISTS event_tactical_shift (
+    event_id UUID,
+    event_duration FLOAT,
+    event_timestamp VARCHAR(20),
+    event_formations INTEGER,
+    event_lineup INTEGER,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    UNIQUE (event_id)
+);
