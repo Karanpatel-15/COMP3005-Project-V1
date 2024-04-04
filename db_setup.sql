@@ -248,7 +248,6 @@ CREATE TABLE IF NOT EXISTS event_goalkeeper (
     event_off_camera BOOLEAN,
     event_outcome VARCHAR(100),
     event_technique VARCHAR(100),
-    event_position VARCHAR(100),
     event_body_part VARCHAR(100),
     event_shot_saved_to_post BOOLEAN,
     event_punched_out BOOLEAN,
@@ -350,7 +349,6 @@ CREATE TABLE IF NOT EXISTS own_goal_against (
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     FOREIGN KEY (event_player) REFERENCES player(player_id),
     FOREIGN KEY (event_team_id) REFERENCES team(team_id),
-    FOREIGN KEY (event_position) REFERENCES position(position_id),
     UNIQUE (event_id)
 ); 
 
@@ -365,7 +363,6 @@ CREATE TABLE IF NOT EXISTS own_goal_for (
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     FOREIGN KEY (event_player) REFERENCES player(player_id),
     FOREIGN KEY (event_team_id) REFERENCES team(team_id),
-    FOREIGN KEY (event_position) REFERENCES position(position_id),
     UNIQUE (event_id)
 ); 
 
@@ -482,6 +479,19 @@ CREATE TABLE IF NOT EXISTS event_shield (
     UNIQUE (event_id)
 );
 
+CREATE TABLE IF NOT EXISTS freeze_frame (
+    freeze_frame_id SERIAL PRIMARY KEY,
+    event_id UUID,
+    event_player INTEGER,
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_position VARCHAR(100),
+    event_teammate BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
 CREATE TABLE IF NOT EXISTS event_shot (
     event_id UUID,
     event_player INTEGER,
@@ -514,19 +524,6 @@ CREATE TABLE IF NOT EXISTS event_shot (
     FOREIGN KEY (event_team_id) REFERENCES team(team_id),
     FOREIGN KEY (event_freeze_frame_id) REFERENCES freeze_frame(freeze_frame_id),
     UNIQUE (event_id)   
-);
-
-CREATE TABLE IF NOT EXISTS freeze_frame (
-    freeze_frame_id SERIAL PRIMARY KEY,
-    event id UUID,
-    event_player INTEGER,
-    event_location_x FLOAT,
-    event_location_y FLOAT,
-    event_position VARCHAR(100),
-    event_teammate BOOLEAN,
-    FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (event_player) REFERENCES player(player_id),
-    UNIQUE (event_id)
 );
 
 --not sure about this about line up
