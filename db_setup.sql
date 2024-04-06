@@ -66,6 +66,15 @@ CREATE TABLE IF NOT EXISTS match (
     FOREIGN KEY (away_team_id) REFERENCES team(team_id)
 );
 
+CREATE TABLE IF NOT EXISTS season_event_mapping (
+    season_id INTEGER, 
+    event_id UUID, 
+    FOREIGN KEY (season_id) REFERENCES season(season_id),
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    PRIMARY KEY (season_id, event_id),
+    UNIQUE (season_id, event_id)
+);
+
 CREATE TABLE IF NOT EXISTS season_match (
     season_id INTEGER, 
     match_id INTEGER PRIMARY KEY,

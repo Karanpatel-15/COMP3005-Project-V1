@@ -8,7 +8,7 @@ class EventStrategyManager:
             # Rayyan Strategies
             # Karan Strategies
             Error.id: Error.Strategy(),
-            FoulCommitted.id: FoulCommitted.Strategy(),
+            # FoulCommitted.id: FoulCommitted.Strategy(),
             # Arhaan Strategies
         }
         self._strategy = None
