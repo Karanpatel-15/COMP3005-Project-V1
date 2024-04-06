@@ -507,7 +507,7 @@ CREATE TABLE IF NOT EXISTS event_shot (
     event_saved_off_target BOOLEAN,
     event_freeze_frame_id INTEGER,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_player_id) REFERENCES player(player_id),
     FOREIGN KEY (event_team_id) REFERENCES team(team_id),
     FOREIGN KEY (event_freeze_frame_id) REFERENCES freeze_frame(freeze_frame_id),
     UNIQUE (event_id)   
