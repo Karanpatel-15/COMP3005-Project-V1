@@ -82,10 +82,26 @@ def insert_data(match_id, data):
     conn.close()
 
 if __name__ == '__main__':
+    requiredMatches = set()
+
+    # Connect to the PostgreSQL database
+    conn = psycopg.connect(**db_params)
+    cursor = conn.cursor()
+
+    query = "SELECT match_id from season_match WHERE season_id in (42, 90, 4, 44)"
+    cursor.execute(query)
+
+    for row in cursor.fetchall():
+        requiredMatches.add(row[0])
+
+    conn.commit()
+    conn.close() 
+
     start = time.time()
-    for file in os.listdir("data/lineups"):
-        if file.endswith(".json"):
-            with open(os.path.join("data/lineups", file)) as f:
+    for file in os.listdir(os.path.join("data","lineups")):
+        if int(file.split('.')[0]) in requiredMatches:
+            with open(os.path.join("data","lineups", file)) as f:
+                print(f"Inserting data for match {file.split('.')[0]}")
                 data = json.load(f)
                 insert_data(file.split('.')[0], data)
-    print(f"Time taken for matches: {time.time() - start:.2f} seconds")
+    print(f"Time taken for lineup: {time.time() - start:.2f} seconds")

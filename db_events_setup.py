@@ -59,8 +59,11 @@ def insert_data(match_id, data):
         insert_or_ignore(cursor, 'match_event', ['match_id', 'event_id'], [match_id, event_id])
         eventStratigieManager = EventStrategyManager.EventStrategyManager()
         #switch case for different event types
-        print(event_typeId)
-        eventStratigieManager.get_strategy_by_id(event_typeId)
+        strategy = eventStratigieManager.get_strategy_by_id(event_typeId)
+        if strategy is not None:
+            strategy.handle(cursor, event)
+        else:
+            continue
 
 
     # Commit changes and close connection
@@ -87,10 +90,9 @@ if __name__ == '__main__':
     print(requiredMatches)   
 
     start = time.time()
-    for file in os.listdir("data/events"):
-        matchId = int(file.split('.')[0])
-        if matchId in requiredMatches:
-            with open(os.path.join("data/events", file)) as f:
+    for file in os.listdir(os.path.join("data","events")):
+        if int(file.split('.')[0]) in requiredMatches:
+            with open(os.path.join("data","events", file)) as f:
                 data = json.load(f)
                 print(f"Inserting data from {file}...")
                 insert_data(file.split('.')[0], data)

@@ -12,6 +12,16 @@ db_params = {
     'port': 5432
 }
 
+RequiredSeasonId = {
+    '2020/2021': 42,
+    '2019/2020': 90,
+    '2018/2019': 4,
+    '2003/2004': 44 
+}
+
+RequiredSeasonIdSet = set(RequiredSeasonId.values())
+
+
 def insert_or_ignore(cursor, table, columns, values):
     """
     Insert a row into the table if it doesn't already exist.
@@ -155,11 +165,11 @@ def insert_match_data(competition_id, season_id, data):
 
 if __name__ == '__main__':
     start = time.time()
-    for dir in os.listdir("data/matches"):
-        if os.path.isdir(os.path.join("data/matches", dir)):
+    for dir in os.listdir(os.path.join("data","matches")):
+        if os.path.isdir(os.path.join("data","matches", dir)):
             for file in os.listdir(os.path.join("data/matches", dir)):
-                if file.endswith(".json"):
-                    with open(os.path.join("data/matches", dir, file)) as f:
+                if int(file.split('.')[0]) in RequiredSeasonIdSet:
+                    with open(os.path.join("data","matches", dir, file)) as f:
                         data = json.load(f)
                         print(f"Inserting data from competition {dir} and season {file}...")
                         insert_match_data(dir,file.split('.')[0], data)

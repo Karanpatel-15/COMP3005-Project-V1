@@ -175,10 +175,9 @@ CREATE TABLE IF NOT EXISTS foul (
     event_id UUID,
     penalty BOOLEAN,
     advantage BOOLEAN,
-    card_id INTEGER,
+    card_type VARCHAR(50),
     offensive BOOLEAN,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (card_id) REFERENCES card(card_id),
     UNIQUE (event_id)
 );
 
