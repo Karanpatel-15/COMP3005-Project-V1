@@ -18,8 +18,9 @@ class EventStrategyManager:
         self._strategy = self._strategies.get(strategy_id)
         if self._strategy is None:
             # raise ValueError("Invalid strategy ID ", strategy_id)
-            print("strategy ID ", strategy_id, " is not implemented yet")
+            # print("strategy ID ", strategy_id, " is not implemented yet")
+            return None
         else:
-            print("strategy ID ", strategy_id, " is implemented")
-        return self._strategy
+            # print("strategy ID ", strategy_id, " is implemented")
+            return self._strategy
 

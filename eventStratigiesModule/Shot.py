@@ -262,9 +262,9 @@ id = 16
 # }
 class Strategy:
     def handle(self,cursor,payload):
-        print("Inserting Shot  " + str(payload))
+        # print("Inserting Shot  " + str(payload))
         if (payload.get('shot', None) == None):
-            print("Shot is None")
+            # print("Shot is None")
             return
         event_id = payload.get('id', None)
         player_id = payload.get('player').get('id')
