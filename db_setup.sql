@@ -144,6 +144,8 @@ CREATE TABLE IF NOT EXISTS event (
     FOREIGN KEY (event_team_id) REFERENCES team(team_id)
 );
 
+
+
 CREATE TABLE IF NOT EXISTS match_event (
     match_id INTEGER,
     event_id UUID,
@@ -479,7 +481,7 @@ CREATE TABLE IF NOT EXISTS freeze_frame (
 
 CREATE TABLE IF NOT EXISTS event_shot (
     event_id UUID,
-    event_player INTEGER,
+    event_player_id INTEGER,
     event_position VARCHAR(100),
     event_team_id INTEGER,
     event_location_x FLOAT,
@@ -488,7 +490,7 @@ CREATE TABLE IF NOT EXISTS event_shot (
     event_out BOOLEAN,
     event_under_pressure BOOLEAN,
     event_off_camera BOOLEAN,
-    events_statsbomb_xg FLOAT,
+    event_statsbomb_xg FLOAT,
     end_location_x FLOAT,
     end_location_y FLOAT,
     event_body_part VARCHAR(100),

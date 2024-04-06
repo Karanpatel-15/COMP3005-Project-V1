@@ -1,13 +1,14 @@
 from eventStratigiesModule import Error
 from eventStratigiesModule import FoulCommitted
-
+from eventStratigiesModule import Shot
 
 class EventStrategyManager:
     def __init__(self):
         self._strategies = {
             # Rayyan Strategies
             # Karan Strategies
-            Error.id: Error.Strategy(),
+            # Error.id: Error.Strategy(),
+            Shot.id: Shot.Strategy(),
             # FoulCommitted.id: FoulCommitted.Strategy(),
             # Arhaan Strategies
         }
