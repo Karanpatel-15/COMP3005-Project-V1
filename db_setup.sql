@@ -66,15 +66,6 @@ CREATE TABLE IF NOT EXISTS match (
     FOREIGN KEY (away_team_id) REFERENCES team(team_id)
 );
 
-CREATE TABLE IF NOT EXISTS season_event_mapping (
-    season_id INTEGER, 
-    event_id UUID, 
-    FOREIGN KEY (season_id) REFERENCES season(season_id),
-    FOREIGN KEY (event_id) REFERENCES event(event_id),
-    PRIMARY KEY (season_id, event_id),
-    UNIQUE (season_id, event_id)
-);
-
 CREATE TABLE IF NOT EXISTS season_match (
     season_id INTEGER, 
     match_id INTEGER PRIMARY KEY,
@@ -159,6 +150,14 @@ CREATE TABLE IF NOT EXISTS match_event (
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     FOREIGN KEY (match_id) REFERENCES match(match_id),
     UNIQUE (event_id, match_id)
+);
+
+CREATE TABLE IF NOT EXISTS season_event_mapping (
+    season_id INTEGER, 
+    event_id UUID, 
+    FOREIGN KEY (season_id) REFERENCES season(season_id),
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    UNIQUE (season_id, event_id)
 );
 
 -- ___________ Rayyan ___________ (5050 to Duel)

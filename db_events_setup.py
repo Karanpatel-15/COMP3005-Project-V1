@@ -97,7 +97,7 @@ if __name__ == '__main__':
             with open(os.path.join("data","events", file)) as f:
                 data = json.load(f)
                 print(f"Inserting data from {file}...")
-                matchId = file.split('.')[0]
+                matchId = int(file.split('.')[0])
                 season_id = matchesToSeasonMapping[matchId]
                 insert_data(season_id, matchId, data)
     print(f"Time taken for events: {time.time() - start:.2f} seconds")
