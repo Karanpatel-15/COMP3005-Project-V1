@@ -2,6 +2,8 @@ import json
 import psycopg
 import os
 import time
+
+from entitiesModule.match import getRequriedMatchIds
 from eventStratigiesModule import EventStrategyManager
 # Database connection parameters
 db_params = {
@@ -56,7 +58,7 @@ def insert_data(season_id,competition_id, match_id, data):
         # Insert event into the table
         insert_or_ignore(cursor, 'event', ['event_id', 'event_index', 'event_period', 'event_timestamp', 'event_minute', 'event_second', 'event_type', 'event_possession', 'event_possession_team_id', 'event_play_pattern', 'event_team_id'], [event_id, event_index, event_period, event_timestamp, event_minute, event_second, event_type, event_possession, event_possession_team_id, event_play_pattern, event_team_id])
         insert_or_ignore(cursor, 'match_event', ['match_id', 'event_id'], [match_id, event_id])
-        insert_or_ignore(cursor, 'season_event_mapping', ['season_id', 'competition_id', 'event_id'], [season_id, competition_id, event_id])
+        insert_or_ignore(cursor, 'competition_season_event_mapping', ['season_id', 'competition_id', 'event_id'], [season_id, competition_id, event_id])
         eventStratigieManager = EventStrategyManager.EventStrategyManager()
         #switch case for different event types
         strategy = eventStratigieManager.get_strategy_by_id(event_typeId)
@@ -69,38 +71,64 @@ def insert_data(season_id,competition_id, match_id, data):
     # Commit changes and close connection
     conn.commit()
     conn.close()
+def loadCompetitionMatches( competitionId, seasonId, cursor):
+    query = "select match_id from match where season_id = %s and competition_id = %s"
+    cursor.execute(query, (seasonId, competitionId))
+    matchIdList = set()
+    for row in cursor.fetchall():
+        matchIdList.add(row[0])
+
+# def loadMatchMetadataMapping(matchIdsArray, cursor):
+#     matchIdToMetadata = {}
+#     placeholders = ', '.join(['%s'] * len(matchIdsArray))
+#     # Form the query string using the placeholders
+#     query = f"SELECT match_id, season_id, competition_id FROM match WHERE match_id IN ({placeholders})"
+#     # Execute the query with the list of match IDs unpacked to match the placeholders
+#     cursor.execute(query, matchIdsArray)
+#     for row in cursor.fetchall():
+#         matchIdToMetadata[row[0]] = {
+#             'season_id': row[1],
+#             'competition_id': row[2]
+#         }
+#     return matchIdToMetadata
+
+def loadMatchMetadataMapping(matchIdsArray, cursor):
+    matchIdToMetadata = {}
+    placeholders = ', '.join(['%s'] * len(matchIdsArray))
+    query = "SELECT match_id, season_id, competition_id FROM match WHERE match_id IN ({})".format(placeholders)
+    cursor.execute(query, matchIdsArray)
+    for row in cursor.fetchall():
+        matchIdToMetadata[row[0]] = {
+            'season_id': row[1],
+            'competition_id': row[2]
+        }
+    return matchIdToMetadata
+
 
 if __name__ == '__main__':
-
-    matchesToSeasonMapping = {}
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
-    
-    for row in cursor.fetchall():
-        season_id = row[0]
-        match_id = row[1]
-        matchesToSeasonMapping[match_id] = season_id
-
-    conn.commit()
-    conn.close() 
-
-    print(matchesToSeasonMapping)
-
     start = time.time()
     counter = 0
+
+    dataToPullIn = [(11,4)]#, (11,42), (11,90), (2,44)]
+    matchesInQuery = getRequriedMatchIds()
+    matchMetadataMapping = loadMatchMetadataMapping(matchesInQuery, cursor)
     for file in os.listdir(os.path.join("data","events")):
-        if int(file.split('.')[0]) in matchesToSeasonMapping:
+        matchId = int(file.split('.')[0])
+        if matchId in matchesInQuery:
             with open(os.path.join("data","events", file)) as f:
                 data = json.load(f)
                 print(f"Inserting data from {file}...")
                 matchId = int(file.split('.')[0])
-                query = "SELECT season_id, competition_id, FROM match_id WHERE match_id = "
-                matchMetadata = cursor.execute(query).fetchone()
-                season_id = matchMetadata[0]
-                competition_id = matchMetadata[1]
+                metadata = matchMetadataMapping.get(matchId, None)
+                season_id = metadata['season_id']
+                competition_id = metadata['competition_id']
                 insert_data(season_id, competition_id, matchId, data)
         counter += 1
         print(f"Inserted data for {counter} matches")
     print(f"Time taken for events: {time.time() - start:.2f} seconds")
+    conn.commit()
+    conn.close()
