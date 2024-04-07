@@ -34,7 +34,7 @@ def handle_half_end(cursor, event_id, event):
     event_duration = event.get('duration', None)
     insert_or_ignore(cursor, 'event_half_end', ['event_id', 'event_duration'], [event_id, event_duration])
 
-def insert_data(season_id, match_id, data):
+def insert_data(season_id,competition_id, match_id, data):
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
@@ -56,7 +56,7 @@ def insert_data(season_id, match_id, data):
         # Insert event into the table
         insert_or_ignore(cursor, 'event', ['event_id', 'event_index', 'event_period', 'event_timestamp', 'event_minute', 'event_second', 'event_type', 'event_possession', 'event_possession_team_id', 'event_play_pattern', 'event_team_id'], [event_id, event_index, event_period, event_timestamp, event_minute, event_second, event_type, event_possession, event_possession_team_id, event_play_pattern, event_team_id])
         insert_or_ignore(cursor, 'match_event', ['match_id', 'event_id'], [match_id, event_id])
-        insert_or_ignore(cursor, 'season_event_mapping', ['season_id', 'event_id'], [season_id, event_id])
+        insert_or_ignore(cursor, 'season_event_mapping', ['season_id', 'competition_id', 'event_id'], [season_id, competition_id, event_id])
         eventStratigieManager = EventStrategyManager.EventStrategyManager()
         #switch case for different event types
         strategy = eventStratigieManager.get_strategy_by_id(event_typeId)
@@ -77,9 +77,6 @@ if __name__ == '__main__':
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
-
-    query = "SELECT season_id, match_id from season_match WHERE season_id in (42, 90, 4, 44)"
-    cursor.execute(query)
     
     for row in cursor.fetchall():
         season_id = row[0]
@@ -99,8 +96,11 @@ if __name__ == '__main__':
                 data = json.load(f)
                 print(f"Inserting data from {file}...")
                 matchId = int(file.split('.')[0])
-                season_id = matchesToSeasonMapping[matchId]
-                insert_data(season_id, matchId, data)
+                query = "SELECT season_id, competition_id, FROM match_id WHERE match_id = "
+                matchMetadata = cursor.execute(query).fetchone()
+                season_id = matchMetadata[0]
+                competition_id = matchMetadata[1]
+                insert_data(season_id, competition_id, matchId, data)
         counter += 1
         print(f"Inserted data for {counter} matches")
     print(f"Time taken for events: {time.time() - start:.2f} seconds")

@@ -28,6 +28,15 @@ def q_1():
       """
     cursor.execute(query, (seasonId,))
     results = cursor.fetchall()
+    resultsInCSV = []
+    with open('data/correct_csv/Q1.csv', mode='r', encoding='utf-8-sig') as file:
+        # Creating a CSV DictReader object
+        csv_reader = csv.DictReader(file)
+        for row in resultsInCSV:
+            resultsInCSV.append(row)
+    print(resultsInCSV)
+
+
     return results
 # In the La Liga season of 2020/2021, find the players with the most shots. Sort them from highest to
 # lowest. Output both the player names and the number of shots. Consider only the players who
@@ -68,4 +77,4 @@ def q_3():
     print(results)
 
 if __name__ == '__main__':
-    q_3()
+    q_1()
