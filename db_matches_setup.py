@@ -12,16 +12,6 @@ db_params = {
     'port': 5432
 }
 
-RequiredSeasonId = {
-    '2020/2021': 42,
-    '2019/2020': 90,
-    '2018/2019': 4,
-    '2003/2004': 44 
-}
-
-RequiredSeasonIdSet = set(RequiredSeasonId.values())
-
-
 def insert_or_ignore(cursor, table, columns, values):
     """
     Insert a row into the table if it doesn't already exist.
@@ -50,11 +40,9 @@ def insert_team_manager(cursor, team_id, manager_id):
     team_manager_data = (team_id, manager_id)
     insert_or_ignore(cursor, 'team_manager', ['team_id', 'manager_id'], team_manager_data)
 
-def insert_match_data(competition_id, season_id, data):
+def insert_match_data(cursor, competition_id, season_id, data):
 
-    # Connect to the PostgreSQL database
-    conn = psycopg.connect(**db_params)
-    cursor = conn.cursor()
+    
     
     # Iterate through JSON data and insert into tables
     for match in data:
@@ -159,20 +147,40 @@ def insert_match_data(competition_id, season_id, data):
         
         # Insert season_match
         # insert_or_ignore(cursor, 'season_match', ['season_id', 'match_id'], (season_id, match['match_id']))
-        
-    # Commit changes and close connection
-    conn.commit()
-    conn.close()
     
 
 if __name__ == '__main__':
     start = time.time()
-    for dir in os.listdir(os.path.join("data","matches")):
-        if os.path.isdir(os.path.join("data","matches", dir)):
-            for file in os.listdir(os.path.join("data/matches", dir)):
-                if int(file.split('.')[0]) in RequiredSeasonIdSet:
-                    with open(os.path.join("data","matches", dir, file)) as f:
-                        data = json.load(f)
-                        print(f"Inserting data from competition {dir} and season {file}...")
-                        insert_match_data(dir,file.split('.')[0], data)
+
+    # Connect to the PostgreSQL database
+    conn = psycopg.connect(**db_params)
+    cursor = conn.cursor()
+
+    COMPETITION_SEASONS_TO_LOAD = [(11,4), (11,42), (11,90), (2,44)]
+    competition_season_map = {}
+    for competition_id, season_id in COMPETITION_SEASONS_TO_LOAD:
+        if competition_id in competition_season_map:
+            competition_season_map[competition_id].append(season_id)
+        else:
+            competition_season_map[competition_id] = [season_id]
+
+    print(competition_season_map)
+
+    matchFolder = os.path.join("data","matches")
+    for dir in os.listdir(matchFolder):
+        if not os.path.isdir(os.path.join(matchFolder, dir)) or int(dir) not in competition_season_map:
+            continue
+        competition_id = int(dir)
+        for file in os.listdir(os.path.join(matchFolder, dir)):
+            match_id = int(file.split('.')[0])  
+            requiredSeason = set(competition_season_map[competition_id])
+            if match_id in requiredSeason:
+                with open(os.path.join(matchFolder, dir, file)) as f:
+                    data = json.load(f)
+                    print(f"Inserting match data from competition {competition_id} and season {file}...")
+                    insert_match_data(cursor, dir,file.split('.')[0], data)
+    
+    # Commit changes and close connection
+    conn.commit()
+    conn.close()
     print(f"Time taken: {time.time()-start} seconds")
