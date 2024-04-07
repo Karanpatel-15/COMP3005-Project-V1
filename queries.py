@@ -1,4 +1,6 @@
 import psycopg
+import os
+import csv
 
 db_params = {
     'dbname': 'postgres',
@@ -24,7 +26,18 @@ def q_1():
       """
     cursor.execute(query, (seasonId,))
     results = cursor.fetchall()
-    print(results)
+    # csvResults = []
+    # compare with values in csv
+    # with open("./data/correct_csv/Q1.csv", mode='r', encoding='utf-8-sig') as file:
+    #     # Creating a CSV DictReader object
+    #     csv_reader = csv.DictReader(file)
+    #     first_row = next(csv_reader)
+    #     for row in csv_reader:
+    #             csvResults.append(row)
+    # for i in range(len(results)):
+    #     resultInCsv = next((x for x in csvResults if x['PLAYER_NAME'] == results[i][0]), None)
+    #     if resultInCsv is None:
+    #         print(results[i], "Not found in csv")
     return results
 
 if __name__ == '__main__':
