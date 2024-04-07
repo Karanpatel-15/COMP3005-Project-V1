@@ -1,14 +1,15 @@
 from eventStratigiesModule import Error
 from eventStratigiesModule import FoulCommitted
-
+from eventStratigiesModule import Shot
 
 class EventStrategyManager:
     def __init__(self):
         self._strategies = {
             # Rayyan Strategies
             # Karan Strategies
-            Error.id: Error.Strategy(),
-            FoulCommitted.id: FoulCommitted.Strategy(),
+            # Error.id: Error.Strategy(),
+            Shot.id: Shot.Strategy(),
+            # FoulCommitted.id: FoulCommitted.Strategy(),
             # Arhaan Strategies
         }
         self._strategy = None
@@ -17,8 +18,9 @@ class EventStrategyManager:
         self._strategy = self._strategies.get(strategy_id)
         if self._strategy is None:
             # raise ValueError("Invalid strategy ID ", strategy_id)
-            print("strategy ID ", strategy_id, " is not implemented yet")
+            # print("strategy ID ", strategy_id, " is not implemented yet")
+            return None
         else:
-            print("strategy ID ", strategy_id, " is implemented")
-        return self._strategy
+            # print("strategy ID ", strategy_id, " is implemented")
+            return self._strategy
 

@@ -34,12 +34,11 @@ def handle_half_end(cursor, event_id, event):
     event_duration = event.get('duration', None)
     insert_or_ignore(cursor, 'event_half_end', ['event_id', 'event_duration'], [event_id, event_duration])
 
-def insert_data(match_id, data):
+def insert_data(season_id, match_id, data):
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
-
     for event in data:
         event_id = event.get('id', None)
         event_index = event.get('index', None)
@@ -57,6 +56,7 @@ def insert_data(match_id, data):
         # Insert event into the table
         insert_or_ignore(cursor, 'event', ['event_id', 'event_index', 'event_period', 'event_timestamp', 'event_minute', 'event_second', 'event_type', 'event_possession', 'event_possession_team_id', 'event_play_pattern', 'event_team_id'], [event_id, event_index, event_period, event_timestamp, event_minute, event_second, event_type, event_possession, event_possession_team_id, event_play_pattern, event_team_id])
         insert_or_ignore(cursor, 'match_event', ['match_id', 'event_id'], [match_id, event_id])
+        insert_or_ignore(cursor, 'season_event_mapping', ['season_id', 'event_id'], [season_id, event_id])
         eventStratigieManager = EventStrategyManager.EventStrategyManager()
         #switch case for different event types
         strategy = eventStratigieManager.get_strategy_by_id(event_typeId)
@@ -72,28 +72,32 @@ def insert_data(match_id, data):
 
 if __name__ == '__main__':
 
-    requiredMatches = set()
+    matchesToSeasonMapping = {}
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
 
-    query = "SELECT match_id from season_match WHERE season_id in (42, 90, 4, 44)"
+    query = "SELECT season_id, match_id from season_match WHERE season_id in (42, 90, 4, 44)"
     cursor.execute(query)
-
+    
     for row in cursor.fetchall():
-        requiredMatches.add(row[0])
+        season_id = row[0]
+        match_id = row[1]
+        matchesToSeasonMapping[match_id] = season_id
 
     conn.commit()
     conn.close() 
 
-    print(requiredMatches)   
+    print(matchesToSeasonMapping)
 
     start = time.time()
     for file in os.listdir(os.path.join("data","events")):
-        if int(file.split('.')[0]) in requiredMatches:
+        if int(file.split('.')[0]) in matchesToSeasonMapping:
             with open(os.path.join("data","events", file)) as f:
                 data = json.load(f)
                 print(f"Inserting data from {file}...")
-                insert_data(file.split('.')[0], data)
+                matchId = int(file.split('.')[0])
+                season_id = matchesToSeasonMapping[matchId]
+                insert_data(season_id, matchId, data)
     print(f"Time taken for events: {time.time() - start:.2f} seconds")
