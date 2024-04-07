@@ -58,21 +58,22 @@ def q_2():
 # should be 1, not 0).
 def q_3():
     seasonIds = [4, 90, 42]
+    competitionId = 11
     query = """
     SELECT 
         p.player_name, 
         COUNT(es.event_id) AS first_time_shots
-    FROM season_event_mapping AS sem
+    FROM competition_season_event_mapping AS sem
     JOIN event_shot AS es ON sem.event_id = es.event_id
     JOIN player AS p ON p.player_id = es.event_player_id
-    WHERE sem.season_id IN (%s,%s,%s) AND es.event_first_time = true
+    WHERE sem.season_id IN (%s,%s,%s) and sem.competition_id=%s and es.event_first_time = true
     GROUP BY p.player_name
     HAVING COUNT(es.event_id) >= 1
     ORDER BY first_time_shots DESC;
           """
-    cursor.execute(query, seasonIds)
+    cursor.execute(query, (seasonIds[0],seasonIds[1],seasonIds[2], competitionId))
     results = cursor.fetchall()
-    print(results)
+    return  results
 
 if __name__ == '__main__':
-    q_2()
+    q_3()
