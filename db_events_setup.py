@@ -146,8 +146,6 @@ if __name__ == '__main__':
     conn.close()
     eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","events"))
     event_files = [os.path.join(eventFolder, file) for file in os.listdir(eventFolder)]
-    
-    with ThreadPoolExecutor() as executor:
-        executor.map(lambda file: process_event_file(file, matchesToSeasonMapping), event_files)
+
     
     print(f"Time taken for events: {time.time() - start:.2f} seconds")

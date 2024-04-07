@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS competition_season_event_mapping (
     event_id UUID,
     FOREIGN KEY (season_id) REFERENCES season(season_id),
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    PRIMARY KEY (season_id, competition_id),
+    PRIMARY KEY (season_id, competition_id, event_id),
     UNIQUE (season_id, event_id)
 );
 
