@@ -2,8 +2,8 @@ import json
 import psycopg
 import os
 import time
-
 from entitiesModule.match import getRequriedMatchIds
+from concurrent.futures import ThreadPoolExecutor
 from eventStratigiesModule import EventStrategyManager
 # Database connection parameters
 db_params = {
@@ -105,7 +105,19 @@ def loadMatchMetadataMapping(matchIdsArray, cursor):
     return matchIdToMetadata
 
 
+def process_event_file(file, matchesToSeasonMapping):
+    """
+    Process event data from a file and insert it into the database.
+    """
+    with open(file) as f:
+        data = json.load(f)
+        matchId = int(os.path.basename(file).split('.')[0])
+        if matchId in matchesToSeasonMapping:
+            season_id = matchesToSeasonMapping[matchId]
+            insert_data(season_id, matchId, data)
+
 if __name__ == '__main__':
+    matchesToSeasonMapping = {}
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
@@ -132,3 +144,10 @@ if __name__ == '__main__':
     print(f"Time taken for events: {time.time() - start:.2f} seconds")
     conn.commit()
     conn.close()
+    eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","events"))
+    event_files = [os.path.join(eventFolder, file) for file in os.listdir(eventFolder)]
+    
+    with ThreadPoolExecutor() as executor:
+        executor.map(lambda file: process_event_file(file, matchesToSeasonMapping), event_files)
+    
+    print(f"Time taken for events: {time.time() - start:.2f} seconds")

@@ -3,6 +3,8 @@ import psycopg
 import os
 import time
 
+from entitiesModule.match import getRequriedMatchIds
+
 # Database connection parameters
 db_params = {
     'dbname': 'postgres',
@@ -82,17 +84,13 @@ def insert_data(match_id, data):
     conn.close()
 
 if __name__ == '__main__':
-    requiredMatches = set()
+    requiredMatches = getRequriedMatchIds()
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
 
-    query = "SELECT match_id from season_match WHERE season_id in (42, 90, 4, 44)"
-    cursor.execute(query)
 
-    for row in cursor.fetchall():
-        requiredMatches.add(row[0])
 
     conn.commit()
     conn.close() 
