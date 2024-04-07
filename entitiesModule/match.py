@@ -17,7 +17,7 @@ def loadCompetitionMatches(competitionId, seasonId, cursor):
 def getRequriedMatchIds():
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
-    competitionSeasonsToLoad = [(11, 4)]
+    competitionSeasonsToLoad = [(11,4), (11,42), (11,90), (2,44)]
     matchIds = []
     for data in competitionSeasonsToLoad:
         matchIds= matchIds + loadCompetitionMatches(data[0], data[1], cursor)

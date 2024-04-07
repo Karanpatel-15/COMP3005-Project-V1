@@ -125,7 +125,6 @@ if __name__ == '__main__':
     start = time.time()
     counter = 0
 
-    dataToPullIn = [(11,4)]#, (11,42), (11,90), (2,44)]
     matchesInQuery = getRequriedMatchIds()
     matchMetadataMapping = loadMatchMetadataMapping(matchesInQuery, cursor)
     for file in os.listdir(os.path.join("data","events")):
@@ -133,19 +132,15 @@ if __name__ == '__main__':
         if matchId in matchesInQuery:
             with open(os.path.join("data","events", file)) as f:
                 data = json.load(f)
-                print(f"Inserting data from {file}...")
                 matchId = int(file.split('.')[0])
                 metadata = matchMetadataMapping.get(matchId, None)
                 season_id = metadata['season_id']
                 competition_id = metadata['competition_id']
                 insert_data(season_id, competition_id, matchId, data)
         counter += 1
-        print(f"Inserted data for {counter} matches")
+        print(f"Inserted event data for {counter} matches")
     print(f"Time taken for events: {time.time() - start:.2f} seconds")
     conn.commit()
     conn.close()
     eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","events"))
     event_files = [os.path.join(eventFolder, file) for file in os.listdir(eventFolder)]
-
-    
-    print(f"Time taken for events: {time.time() - start:.2f} seconds")
