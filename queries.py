@@ -12,7 +12,9 @@ db_params = {
 conn = psycopg.connect(**db_params)
 cursor = conn.cursor()
 
-
+# In the La Liga season of 2020/2021, sort the players from highest to lowest based on their average
+# xG scores. Output both the player names and their average xG scores. Consider only the players
+# who made at least one shot (the xG scores are greater than 0).
 def q_1():
     # TODO: FETCH THE SEASON ID
     seasonId = 4
@@ -26,20 +28,10 @@ def q_1():
       """
     cursor.execute(query, (seasonId,))
     results = cursor.fetchall()
-    # csvResults = []
-    # compare with values in csv
-    # with open("./data/correct_csv/Q1.csv", mode='r', encoding='utf-8-sig') as file:
-    #     # Creating a CSV DictReader object
-    #     csv_reader = csv.DictReader(file)
-    #     first_row = next(csv_reader)
-    #     for row in csv_reader:
-    #             csvResults.append(row)
-    # for i in range(len(results)):
-    #     resultInCsv = next((x for x in csvResults if x['PLAYER_NAME'] == results[i][0]), None)
-    #     if resultInCsv is None:
-    #         print(results[i], "Not found in csv")
     return results
-
+# In the La Liga season of 2020/2021, find the players with the most shots. Sort them from highest to
+# lowest. Output both the player names and the number of shots. Consider only the players who
+# made at least one shot (the lowest number of shots should be 1, not 0).
 def q_2():
     seasonId = 4
     query = """
@@ -53,5 +45,27 @@ def q_2():
     cursor.execute(query, (seasonId,))
     results = cursor.fetchall()
 
+# In the La Liga seasons of 2020/2021, 2019/2020, and 2018/2019 combined, find the players with the
+# most first-time shots. Sort them from highest to lowest. Output the player names and the number
+# of first time shots. Consider only the players who made at least one shot (the lowest number of shots
+# should be 1, not 0).
+def q_3():
+    seasonIds = [4, 90, 42]
+    query = """
+    SELECT 
+        p.player_name, 
+        COUNT(es.event_id) AS first_time_shots
+    FROM season_event_mapping AS sem
+    JOIN event_shot AS es ON sem.event_id = es.event_id
+    JOIN player AS p ON p.player_id = es.event_player_id
+    WHERE sem.season_id IN (%s,%s,%s) AND es.event_first_time = true
+    GROUP BY p.player_name
+    HAVING COUNT(es.event_id) >= 1
+    ORDER BY first_time_shots DESC;
+          """
+    cursor.execute(query, seasonIds)
+    results = cursor.fetchall()
+    print(results)
+
 if __name__ == '__main__':
-    q_1()
+    q_3()

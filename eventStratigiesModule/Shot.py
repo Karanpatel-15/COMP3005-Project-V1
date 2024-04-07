@@ -269,4 +269,5 @@ class Strategy:
         event_id = payload.get('id', None)
         player_id = payload.get('player').get('id')
         statsbomb_xg = payload.get('shot', None).get('statsbomb_xg')
-        insert_or_ignore(cursor, 'event_shot', ['event_id', 'event_player_id', 'event_statsbomb_xg'], [event_id, player_id, statsbomb_xg])
+        event_first_time = payload.get('shot', None).get('first_time')
+        insert_or_ignore(cursor, 'event_shot', ['event_id', 'event_player_id', 'event_statsbomb_xg', 'event_first_time'], [event_id, player_id, statsbomb_xg, event_first_time])

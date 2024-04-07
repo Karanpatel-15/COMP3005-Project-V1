@@ -92,6 +92,7 @@ if __name__ == '__main__':
     print(matchesToSeasonMapping)
 
     start = time.time()
+    counter = 0
     for file in os.listdir(os.path.join("data","events")):
         if int(file.split('.')[0]) in matchesToSeasonMapping:
             with open(os.path.join("data","events", file)) as f:
@@ -100,4 +101,6 @@ if __name__ == '__main__':
                 matchId = int(file.split('.')[0])
                 season_id = matchesToSeasonMapping[matchId]
                 insert_data(season_id, matchId, data)
+        counter += 1
+        print(f"Inserted data for {counter} matches")
     print(f"Time taken for events: {time.time() - start:.2f} seconds")
