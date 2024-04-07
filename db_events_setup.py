@@ -2,6 +2,7 @@ import json
 import psycopg
 import os
 import time
+from entitiesModule.match import getRequriedMatchIds
 from concurrent.futures import ThreadPoolExecutor
 from eventStratigiesModule import EventStrategyManager
 # Database connection parameters
@@ -35,7 +36,7 @@ def handle_half_end(cursor, event_id, event):
     event_duration = event.get('duration', None)
     insert_or_ignore(cursor, 'event_half_end', ['event_id', 'event_duration'], [event_id, event_duration])
 
-def insert_data(season_id, match_id, data):
+def insert_data(season_id,competition_id, match_id, data):
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
@@ -57,7 +58,7 @@ def insert_data(season_id, match_id, data):
         # Insert event into the table
         insert_or_ignore(cursor, 'event', ['event_id', 'event_index', 'event_period', 'event_timestamp', 'event_minute', 'event_second', 'event_type', 'event_possession', 'event_possession_team_id', 'event_play_pattern', 'event_team_id'], [event_id, event_index, event_period, event_timestamp, event_minute, event_second, event_type, event_possession, event_possession_team_id, event_play_pattern, event_team_id])
         insert_or_ignore(cursor, 'match_event', ['match_id', 'event_id'], [match_id, event_id])
-        insert_or_ignore(cursor, 'season_event_mapping', ['season_id', 'event_id'], [season_id, event_id])
+        insert_or_ignore(cursor, 'competition_season_event_mapping', ['season_id', 'competition_id', 'event_id'], [season_id, competition_id, event_id])
         eventStratigieManager = EventStrategyManager.EventStrategyManager()
         #switch case for different event types
         strategy = eventStratigieManager.get_strategy_by_id(event_typeId)
@@ -70,41 +71,38 @@ def insert_data(season_id, match_id, data):
     # Commit changes and close connection
     conn.commit()
     conn.close()
+def loadCompetitionMatches( competitionId, seasonId, cursor):
+    query = "select match_id from match where season_id = %s and competition_id = %s"
+    cursor.execute(query, (seasonId, competitionId))
+    matchIdList = set()
+    for row in cursor.fetchall():
+        matchIdList.add(row[0])
 
-# if __name__ == '__main__':
-
-#     matchesToSeasonMapping = {}
-
-#     # Connect to the PostgreSQL database
-#     conn = psycopg.connect(**db_params)
-#     cursor = conn.cursor()
-
-#     query = "SELECT season_id, match_id from season_match WHERE season_id in (42, 90, 4, 44)"
-#     cursor.execute(query)
-    
+# def loadMatchMetadataMapping(matchIdsArray, cursor):
+#     matchIdToMetadata = {}
+#     placeholders = ', '.join(['%s'] * len(matchIdsArray))
+#     # Form the query string using the placeholders
+#     query = f"SELECT match_id, season_id, competition_id FROM match WHERE match_id IN ({placeholders})"
+#     # Execute the query with the list of match IDs unpacked to match the placeholders
+#     cursor.execute(query, matchIdsArray)
 #     for row in cursor.fetchall():
-#         season_id = row[0]
-#         match_id = row[1]
-#         matchesToSeasonMapping[match_id] = season_id
+#         matchIdToMetadata[row[0]] = {
+#             'season_id': row[1],
+#             'competition_id': row[2]
+#         }
+#     return matchIdToMetadata
 
-#     conn.commit()
-#     conn.close() 
-
-#     print(matchesToSeasonMapping)
-
-#     start = time.time()
-#     eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","events"))
-#     print(f"Reading events from {eventFolder}...")
-#     for file in os.listdir(eventFolder):
-#         print(file)
-#         if int(file.split('.')[0]) in matchesToSeasonMapping:
-#             with open(os.path.join(eventFolder, file)) as f:
-#                 data = json.load(f)
-#                 print(f"Inserting data from {file}...")
-#                 matchId = int(file.split('.')[0])
-#                 season_id = matchesToSeasonMapping[matchId]
-#                 insert_data(season_id, matchId, data)
-#     print(f"Time taken for events: {time.time() - start:.2f} seconds")
+def loadMatchMetadataMapping(matchIdsArray, cursor):
+    matchIdToMetadata = {}
+    placeholders = ', '.join(['%s'] * len(matchIdsArray))
+    query = "SELECT match_id, season_id, competition_id FROM match WHERE match_id IN ({})".format(placeholders)
+    cursor.execute(query, matchIdsArray)
+    for row in cursor.fetchall():
+        matchIdToMetadata[row[0]] = {
+            'season_id': row[1],
+            'competition_id': row[2]
+        }
+    return matchIdToMetadata
 
 
 def process_event_file(file, matchesToSeasonMapping):
@@ -124,25 +122,30 @@ if __name__ == '__main__':
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
-
-    query = "SELECT season_id, match_id from season_match WHERE season_id in (42, 90, 4, 44)"
-    cursor.execute(query)
-    
-    for row in cursor.fetchall():
-        season_id = row[0]
-        match_id = row[1]
-        matchesToSeasonMapping[match_id] = season_id
-
-    conn.commit()
-    conn.close() 
-
-    print(matchesToSeasonMapping)
-
     start = time.time()
+    counter = 0
+
+    dataToPullIn = [(11,4)]#, (11,42), (11,90), (2,44)]
+    matchesInQuery = getRequriedMatchIds()
+    matchMetadataMapping = loadMatchMetadataMapping(matchesInQuery, cursor)
+    for file in os.listdir(os.path.join("data","events")):
+        matchId = int(file.split('.')[0])
+        if matchId in matchesInQuery:
+            with open(os.path.join("data","events", file)) as f:
+                data = json.load(f)
+                print(f"Inserting data from {file}...")
+                matchId = int(file.split('.')[0])
+                metadata = matchMetadataMapping.get(matchId, None)
+                season_id = metadata['season_id']
+                competition_id = metadata['competition_id']
+                insert_data(season_id, competition_id, matchId, data)
+        counter += 1
+        print(f"Inserted data for {counter} matches")
+    print(f"Time taken for events: {time.time() - start:.2f} seconds")
+    conn.commit()
+    conn.close()
     eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","events"))
     event_files = [os.path.join(eventFolder, file) for file in os.listdir(eventFolder)]
-    
-    with ThreadPoolExecutor() as executor:
-        executor.map(lambda file: process_event_file(file, matchesToSeasonMapping), event_files)
+
     
     print(f"Time taken for events: {time.time() - start:.2f} seconds")

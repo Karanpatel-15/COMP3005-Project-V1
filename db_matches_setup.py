@@ -138,6 +138,8 @@ def insert_match_data(competition_id, season_id, data):
         # Insert match data
         match_data = (
             match['match_id'],
+            match['season']['season_id'],
+            match['competition']['competition_id'],
             match['match_date'] if 'match_date' in match else None,
             match['kick_off'] if 'kick_off' in match else None,
             match['stadium']['id'] if 'stadium' in match else None,
@@ -150,13 +152,13 @@ def insert_match_data(competition_id, season_id, data):
             match['match_week'] if 'match_week' in match else None,
             match['competition_stage']['name'] if 'competition_stage' in match else None
         )
-        insert_or_ignore(cursor, 'match', ['match_id', 'match_date', 'kick_off', 'stadium_id', 'referee_id', 'home_team_id', 'away_team_id', 'home_score', 'away_score', 'match_status', 'match_week', 'competition_stage'], match_data)
+        insert_or_ignore(cursor, 'match', ['match_id','season_id', 'competition_id', 'match_date', 'kick_off', 'stadium_id', 'referee_id', 'home_team_id', 'away_team_id', 'home_score', 'away_score', 'match_status', 'match_week', 'competition_stage'], match_data)
 
         # Insert competition_season
         insert_or_ignore(cursor, 'competition_season', ['competition_id', 'season_id'], (competition_id, season_id))
         
         # Insert season_match
-        insert_or_ignore(cursor, 'season_match', ['season_id', 'match_id'], (season_id, match['match_id']))
+        # insert_or_ignore(cursor, 'season_match', ['season_id', 'match_id'], (season_id, match['match_id']))
         
     # Commit changes and close connection
     conn.commit()
