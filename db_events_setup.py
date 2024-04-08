@@ -14,13 +14,6 @@ db_params = {
     'port': 5432
 }
 
-RequiredSeasonId = {
-    '2020/2021': 42,
-    '2019/2020': 90,
-    '2018/2019': 4,
-    '2003/2004': 44 
-}
-
 def insert_or_ignore(cursor, table, columns, values):
     """
     Insert a row into the table if it doesn't already exist.
@@ -36,11 +29,8 @@ def handle_half_end(cursor, event_id, event):
     event_duration = event.get('duration', None)
     insert_or_ignore(cursor, 'event_half_end', ['event_id', 'event_duration'], [event_id, event_duration])
 
-def insert_data(season_id,competition_id, match_id, data):
+def insert_data(cursor, season_id,competition_id, match_id, data):
 
-    # Connect to the PostgreSQL database
-    conn = psycopg.connect(**db_params)
-    cursor = conn.cursor()
     for event in data:
         event_id = event.get('id', None)
         event_index = event.get('index', None)
@@ -68,29 +58,13 @@ def insert_data(season_id,competition_id, match_id, data):
             continue
 
 
-    # Commit changes and close connection
-    conn.commit()
-    conn.close()
+
 def loadCompetitionMatches( competitionId, seasonId, cursor):
     query = "select match_id from match where season_id = %s and competition_id = %s"
     cursor.execute(query, (seasonId, competitionId))
     matchIdList = set()
     for row in cursor.fetchall():
         matchIdList.add(row[0])
-
-# def loadMatchMetadataMapping(matchIdsArray, cursor):
-#     matchIdToMetadata = {}
-#     placeholders = ', '.join(['%s'] * len(matchIdsArray))
-#     # Form the query string using the placeholders
-#     query = f"SELECT match_id, season_id, competition_id FROM match WHERE match_id IN ({placeholders})"
-#     # Execute the query with the list of match IDs unpacked to match the placeholders
-#     cursor.execute(query, matchIdsArray)
-#     for row in cursor.fetchall():
-#         matchIdToMetadata[row[0]] = {
-#             'season_id': row[1],
-#             'competition_id': row[2]
-#         }
-#     return matchIdToMetadata
 
 def loadMatchMetadataMapping(matchIdsArray, cursor):
     matchIdToMetadata = {}
@@ -104,48 +78,33 @@ def loadMatchMetadataMapping(matchIdsArray, cursor):
         }
     return matchIdToMetadata
 
-
-def process_event_file(file, matchesToSeasonMapping):
-    """
-    Process event data from a file and insert it into the database.
-    """
-    with open(file) as f:
-        data = json.load(f)
-        matchId = int(os.path.basename(file).split('.')[0])
-        if matchId in matchesToSeasonMapping:
-            season_id = matchesToSeasonMapping[matchId]
-            insert_data(season_id, matchId, data)
-
 if __name__ == '__main__':
+    start = time.time()
+    
     matchesToSeasonMapping = {}
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
-    start = time.time()
     counter = 0
 
-    dataToPullIn = [(11,4)]#, (11,42), (11,90), (2,44)]
     matchesInQuery = getRequriedMatchIds()
     matchMetadataMapping = loadMatchMetadataMapping(matchesInQuery, cursor)
-    for file in os.listdir(os.path.join("data","events")):
+    eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","events"))
+
+    for file in os.listdir(eventFolder):
         matchId = int(file.split('.')[0])
         if matchId in matchesInQuery:
-            with open(os.path.join("data","events", file)) as f:
+            with open(os.path.join(eventFolder, file)) as f:
                 data = json.load(f)
-                print(f"Inserting data from {file}...")
                 matchId = int(file.split('.')[0])
                 metadata = matchMetadataMapping.get(matchId, None)
                 season_id = metadata['season_id']
                 competition_id = metadata['competition_id']
-                insert_data(season_id, competition_id, matchId, data)
+                insert_data(cursor, season_id, competition_id, matchId, data)
         counter += 1
-        print(f"Inserted data for {counter} matches")
-    print(f"Time taken for events: {time.time() - start:.2f} seconds")
+        print(f"Inserted event data for {counter} matches")
+
     conn.commit()
     conn.close()
-    eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","events"))
-    event_files = [os.path.join(eventFolder, file) for file in os.listdir(eventFolder)]
-
-    
     print(f"Time taken for events: {time.time() - start:.2f} seconds")

@@ -4,8 +4,6 @@ from db_events_setup import insert_or_ignore
 id = 37
 class Strategy:
     def handle(self, cursor, payload):
-        print("Inserting Error  " + str(payload))
-
         event_id = payload.get('id', None)
         event_player = payload.get('player', None).get('id', None)
         event_position = payload.get('position', None).get('name', None)

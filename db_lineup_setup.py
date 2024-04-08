@@ -2,7 +2,6 @@ import json
 import psycopg
 import os
 import time
-
 from entitiesModule.match import getRequriedMatchIds
 
 # Database connection parameters
@@ -21,11 +20,7 @@ def insert_or_ignore(cursor, table, columns, values):
     query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(['%s' for _ in values])}) ON CONFLICT DO NOTHING"
     cursor.execute(query, values)
 
-def insert_data(match_id, data):
-
-    # Connect to the PostgreSQL database
-    conn = psycopg.connect(**db_params)
-    cursor = conn.cursor()
+def insert_data(cursor, match_id, data):
 
     # Insert match
     insert_or_ignore(cursor, 'match', ['match_id'], (match_id,))
@@ -79,27 +74,24 @@ def insert_data(match_id, data):
 
                 insert_or_ignore(cursor, 'card', ['player_id', 'match_id', 'card_time', 'card_type', 'card_reason', 'card_period'], (player_id, match_id, card_time, card_type, card_reason, card_period))
 
-    # Commit changes and close connection
-    conn.commit()
-    conn.close()
-
 if __name__ == '__main__':
-    requiredMatches = getRequriedMatchIds()
+    start = time.time()
 
     # Connect to the PostgreSQL database
     conn = psycopg.connect(**db_params)
     cursor = conn.cursor()
+    
+    requiredMatches = getRequriedMatchIds()
 
+    lineupFolder = os.environ.get("LINEUP_FOLDER_PATH", os.path.join("data","lineups"))
 
-
+    for file in os.listdir(lineupFolder):
+        match_id = int(file.split('.')[0])
+        if match_id in requiredMatches:
+            with open(os.path.join(lineupFolder, file)) as f:
+                print(f"Inserting lineup data for match {match_id}")
+                data = json.load(f)
+                insert_data(cursor, match_id, data)
     conn.commit()
     conn.close() 
-
-    start = time.time()
-    for file in os.listdir(os.path.join("data","lineups")):
-        if int(file.split('.')[0]) in requiredMatches:
-            with open(os.path.join("data","lineups", file)) as f:
-                print(f"Inserting data for match {file.split('.')[0]}")
-                data = json.load(f)
-                insert_data(file.split('.')[0], data)
     print(f"Time taken for lineup: {time.time() - start:.2f} seconds")

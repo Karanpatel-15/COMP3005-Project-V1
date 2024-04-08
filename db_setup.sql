@@ -164,6 +164,39 @@ CREATE TABLE IF NOT EXISTS competition_season_event_mapping (
 
 -- ___________ Rayyan ___________ (5050 to Duel)
 
+CREATE TABLE IF NOT EXISTS event_dribble (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    event_under_pressure BOOLEAN,
+    event_off_camera BOOLEAN,
+    event_out BOOLEAN,
+    event_outcome VARCHAR(100),
+    event_overrun BOOLEAN,
+    event_nutmeg BOOLEAN,
+    event_no_touch BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_dribbled_past (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    event_counterpress BOOLEAN,
+    event_off_camera BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
 
 -- ___________ Karan ___________  (Error to Offside)
 
@@ -353,28 +386,47 @@ CREATE TABLE IF NOT EXISTS own_goal_for (
     UNIQUE (event_id)
 );
 
--- CREATE TABLE IF NOT EXISTS pass(
---     event_id UUID,
---
--- );
 
--- CREATE TABLE IF NOT EXISTS event_passes(
---     event_id UUID,
---     event_player INTEGER,
---     event_position VARCHAR(100),
---     event_location_x FLOAT,
---     event_location_y FLOAT,
---     event_duration FLOAT,
---     pass_id INTEGER,
---     event_under_pressure BOOLEAN,
---     event_off_camera BOOLEAN,
---     event_counterpress BOOLEAN,
---     event_out BOOLEAN,
---     FOREIGN KEY (event_id) REFERENCES event(event_id),
---     FOREIGN KEY (event_player) REFERENCES player(player_id),
---     FOREIGN KEY (pass_id) REFERENCES pass(pass_id),
---     UNIQUE (event_id)
--- );
+CREATE TABLE IF NOT EXISTS event_pass (
+    event_id UUID,
+    event_player INTEGER,
+    event_position VARCHAR(100),
+    event_location_x FLOAT,
+    event_location_y FLOAT,
+    event_duration FLOAT,
+    event_under_pressure BOOLEAN,
+    event_off_camera BOOLEAN,
+    event_counterpress BOOLEAN,
+    event_out BOOLEAN,
+    event_recipient_id INTEGER,
+    event_length FLOAT,
+    event_angle FLOAT,
+    event_height VARCHAR(100),
+    event_end_location_x FLOAT,
+    event_end_location_y FLOAT,
+    event_body_part VARCHAR(100),
+    event_type VARCHAR(100),
+    event_outcome VARCHAR(100),
+    event_aerial_won BOOLEAN,
+    event_shot_assist BOOLEAN,
+    event_switch BOOLEAN,
+    event_cross BOOLEAN,
+    event_deflected BOOLEAN,
+    event_inswinging BOOLEAN,
+    event_technique VARCHAR(100),
+    event_through_ball BOOLEAN,
+    event_no_touch BOOLEAN,
+    event_outswinging BOOLEAN,
+    event_miscommunication BOOLEAN,
+    event_cut_back BOOLEAN,
+    event_goal_assist BOOLEAN,
+    event_straight BOOLEAN,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_recipient_id) REFERENCES player(player_id),
+    UNIQUE (event_id)
+);
+
 
 CREATE TABLE IF NOT EXISTS event_playerOff (
     event_id UUID,
