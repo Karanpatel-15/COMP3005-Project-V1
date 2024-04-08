@@ -1,9 +1,10 @@
-from eventStratigiesModule import Error, Dribble, Shot, FoulCommitted, Pass
+from eventStratigiesModule import Error, Dribble, DribblePast, Shot, FoulCommitted, Pass
 class EventStrategyManager:
     def __init__(self):
         self._strategies = {
             # Rayyan Strategies
             Dribble.id: Dribble.Strategy(),
+            DribblePast.id: DribblePast.Strategy(),
             # Karan Strategies
             Error.id: Error.Strategy(),
             Shot.id: Shot.Strategy(),
