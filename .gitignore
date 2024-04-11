@@ -1,4 +1,3 @@
-json_loader/data
+/json_loader/data/events
 /.idea
-/__pycache__
 test.json

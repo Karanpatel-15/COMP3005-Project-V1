@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     matchesInQuery = getRequriedMatchIds()
     matchMetadataMapping = loadMatchMetadataMapping(matchesInQuery, cursor)
-    eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","events"))
+    eventFolder = os.environ.get("EVENT_FOLDER_PATH", os.path.join("data","eventsSmall"))
 
     for file in os.listdir(eventFolder):
         matchId = int(file.split('.')[0])
