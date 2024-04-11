@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS event_block (
 --don't know what the enum type name is for 
 
 CREATE TABLE IF NOT EXISTS event_carry (
-    event id UUID,
+    event_id UUID,
     event_player INTEGER,
     event_position VARCHAR(100),
     event_team_id INTEGER,
