@@ -1,4 +1,4 @@
-/data
+json_loader/data
 /.idea
 /__pycache__
 test.json
