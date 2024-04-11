@@ -1,237 +1,389 @@
+'''
+Version 1.11 (04/02/2024)
+=========================================================
+queries.py (Carleton University COMP3005 - Database Management Student Template Code)
+
+This is the template code for the COMP3005 Database Project 1, and must be accomplished on an Ubuntu Linux environment.
+Your task is to ONLY write your SQL queries within the prompted space within each Q_# method (where # is the question number).
+
+You may modify code in terms of testing purposes (commenting out a Qn method), however, any alterations to the code, such as modifying the time, 
+will be flagged for suspicion of cheating - and thus will be reviewed by the staff and, if need be, the Dean. 
+
+To review the Integrity Violation Attributes of Carleton University, please view https://carleton.ca/registrar/academic-integrity/ 
+
+=========================================================
+'''
+
+# Imports
 import psycopg
-import os
 import csv
+import subprocess
+import os
+import re
 
-db_params = {
-    'dbname': 'postgres',
-    'user': 'postgres',
-    'password': 'admin',
-    'host': 'localhost',
-    'port': 5432
-}
-conn = psycopg.connect(**db_params)
-cursor = conn.cursor()
+# Connection Information
+''' 
+The following is the connection information for this project. These settings are used to connect this file to the autograder.
+You must NOT change these settings - by default, db_host, db_port and db_username are as follows when first installing and utilizing psql.
+For the user "postgres", you must MANUALLY set the password to 1234.
+'''
+root_database_name = "postgres"
+query_database_name = "postgres"
+db_username = 'postgres'
+db_password = 'admin'
+db_host = 'localhost'
+db_port = '5432'
 
-seasonIds = {
-    '2020/2021': 90,
-    '2019/2020': 42,
-    '2018/2019': 4,
-    '2003/2004': 44
-}
-competitionIds = {
-    'La Liga': 11,
-    'Premier League': 2
-}
+# Directory Path - Do NOT Modify
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
-# In the La Liga season of 2020/2021, sort the players from highest to lowest based on their average
-# xG scores. Output both the player names and their average xG scores. Consider only the players
-# who made at least one shot (the xG scores are greater than 0).
-def q_1():
-    # TODO: FETCH THE SEASON ID
+# Loading the Database after Drop - Do NOT Modify
+#================================================
+def load_database(cursor, conn):
+    drop_database(cursor, conn)
+
+    # Create the Database if it DNE
+    try:
+        conn.autocommit = True
+        cursor.execute(f"CREATE DATABASE {query_database_name};")
+        conn.commit()
+    except Exception as error:
+        print(error)
+    finally:
+        conn.autocommit = False
+    conn.close()
+    
+    # Connect to this query database.
+    dbname = query_database_name
+    user = db_username
+    password = db_password
+    host = db_host
+    port = db_port
+    conn = psycopg.connect(dbname=dbname, user=user, password=password, host=host, port=port)
+    cursor = conn.cursor()
+    
+    # Import the dbexport.sql database data into this database
+    try:
+        command = f'psql -h {host} -U {user} -d {query_database_name} -a -f {os.path.join(dir_path, "dbexport.sql")}'
+        env = {'PGPASSWORD': password}
+        subprocess.run(command, shell=True, check=True, env=env)
+
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while loading the database: {e}")
+    
+    # Return this connection.
+    return conn    
+
+# Dropping the Database after Query n Execution - Do NOT Modify
+#================================================
+def drop_database(cursor, conn):
+    # Drop database if it exists.
+    try:
+        conn.autocommit = True
+        cursor.execute(f"DROP DATABASE IF EXISTS {query_database_name};")
+        conn.commit()
+    except Exception as error:
+        print(error)
+        pass
+    finally:
+        conn.autocommit = False
+
+# Reconnect to Root Database - Do NOT Modify
+#================================================
+def reconnect(cursor, conn):
+    cursor.close()
+    conn.close()
+
+    dbname = root_database_name
+    user = db_username
+    password = db_password
+    host = db_host
+    port = db_port
+    return psycopg.connect(dbname=dbname, user=user, password=password, host=host, port=port)
+
+# Getting the execution time of the query through EXPLAIN ANALYZE - Do NOT Modify
+#================================================
+def get_time(cursor, conn, sql_query):
+    # Prefix your query with EXPLAIN ANALYZE
+    explain_query = f"EXPLAIN ANALYZE {sql_query}"
+
+    try:
+        # Execute the EXPLAIN ANALYZE query
+        cursor.execute(explain_query)
+        
+        # Fetch all rows from the cursor
+        explain_output = cursor.fetchall()
+        
+        # Convert the output tuples to a single string
+        explain_text = "\n".join([row[0] for row in explain_output])
+        
+        # Use regular expression to find the execution time
+        # Look for the pattern "Execution Time: <time> ms"
+        match = re.search(r"Execution Time: ([\d.]+) ms", explain_text)
+        if match:
+            execution_time = float(match.group(1))
+            return f"Execution Time: {execution_time} ms"
+        else:
+            print("Execution Time not found in EXPLAIN ANALYZE output.")
+            return f"NA"
+    except:
+        print("[ERROR] Error getting time.")
+
+
+# Write the results into some Q_n CSV. If the is an error with the query, it is a INC result - Do NOT Modify
+#================================================
+def write_csv(execution_time, cursor, conn, i):
+    # Collect all data into this csv, if there is an error from the query execution, the resulting time is INC.
+    try:
+        colnames = [desc[0] for desc in cursor.description]
+        rows = cursor.fetchall()
+        filename = f"{dir_path}/Q_{i}.csv"
+
+        with open(filename, 'w', encoding='utf-8', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            
+            # Write column names to the CSV file
+            csvwriter.writerow(colnames)
+            
+            # Write data rows to the CSV file
+            csvwriter.writerows(rows)
+
+    except Exception as error:
+        execution_time[i-1] = "INC"
+        print(error)
+    
+#================================================
+        
+'''
+The following 10 methods, (Q_n(), where 1 < n < 10) will be where you are tasked to input your queries.
+To reiterate, any modification outside of the query line will be flagged, and then marked as potential cheating.
+Once you run this script, these 10 methods will run and print the times in order from top to bottom, Q1 to Q10 in the terminal window.
+'''
+def Q_1(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================
+    # Enter QUERY within the quotes:
+
     query = """
-      SELECT player_name, AVG(event_statsbomb_xg) as avg_xg
-      FROM competition_season_event_mapping AS SEM
-      JOIN event_shot ON SEM.event_id = event_shot.event_id
-      JOIN player ON player.player_id = event_shot.event_player_id
-      WHERE SEM.season_id = %s and SEM.competition_id = %s and event_shot.event_statsbomb_xg > 0
-      GROUP BY player_name
-      ORDER BY avg_xg DESC
-
-      """
-    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
-    results = cursor.fetchall()
-    print(results)
-
-
-    return results
-# In the La Liga season of 2020/2021, find the players with the most shots. Sort them from highest to
-# lowest. Output both the player names and the number of shots. Consider only the players who
-# made at least one shot (the lowest number of shots should be 1, not 0).
-def q_2():
-    query = """
-    SELECT player_name, COUNT(SEM.event_id) as number_shots
-      FROM competition_season_event_mapping AS SEM
-      JOIN event_shot ON SEM.event_id = event_shot.event_id
-      JOIN player ON player.player_id = event_shot.event_player_id
-      WHERE SEM.season_id = %s and SEM.competition_id = %s and event_shot.event_statsbomb_xg > 0
-      GROUP BY player_name
-      ORDER BY number_shots DESC
-          """
-    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
-    results = cursor.fetchall()
-    print(results)
-    print(len(results))
-    return  results
-# In the La Liga seasons of 2020/2021, 2019/2020, and 2018/2019 combined, find the players with the
-# most first-time shots. Sort them from highest to lowest. Output the player names and the number
-# of first time shots. Consider only the players who made at least one shot (the lowest number of shots
-# should be 1, not 0).
-def q_3():
-    query = """
-    SELECT 
-        p.player_name, 
-        COUNT(es.event_id) AS first_time_shots
-    FROM competition_season_event_mapping AS sem
-    JOIN event_shot AS es ON sem.event_id = es.event_id
-    JOIN player AS p ON p.player_id = es.event_player_id
-    WHERE sem.season_id IN (%s,%s,%s) and sem.competition_id=%s 
-    and es.event_first_time = true
-    GROUP BY p.player_name
-    HAVING COUNT(es.event_id) >= 1
-    ORDER BY first_time_shots DESC;
-          """
-    cursor.execute(query, (seasonIds['2020/2021'],seasonIds['2019/2020'],seasonIds['2018/2019'], competitionIds['La Liga']))
-    results = cursor.fetchall()
-    return  results
-
-# In the La Liga season of 2020/2021, find the teams with the most passes made. Sort them from
-# highest to lowest. Output the team names and the number of passes. Consider the teams that
-# make at least one pass (the lowest number of passes is 1, not 0).
-def q_4():
-    query = """
-            Select team.team_name, COUNT(team.team_id) as number_of_passes from competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on lineup.team_id = team.team_id
-        WHERE SEM.season_id = %s and sem.competition_id=%s
-        GROUP BY (team.team_id)
-        ORDER BY number_of_passes DESC
+        SELECT player_name, AVG(event_statsbomb_xg) as avg_xg
+        FROM competition_season_event_mapping AS SEM
+        JOIN event_shot ON SEM.event_id = event_shot.event_id
+        JOIN player ON player.player_id = event_shot.event_player_id
+        WHERE SEM.season_id = 90 and SEM.competition_id = 11 and event_shot.event_statsbomb_xg > 0
+        GROUP BY player_name
+        ORDER BY avg_xg DESC 
     """
-    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
-    results = cursor.fetchall()
-    return  results
 
-# Q 5: In the Premier League season of 2003/2004, find the players who were the most intended recipients
-# of passes. Sort them from highest to lowest. Output the player names and the number of times
-# they were the intended recipients of passes. Consider the players who received at least one pass
-# (the lowest number of times they were the intended recipients is 1, not 0).
-def q_5():
+    #==========================================================================
 
-    query = """
-      Select P.player_name,  COUNT(EP.event_recipient_id) as count_intended_recipient from competition_season_event_mapping AS SEM 
-    JOIN event_pass as EP on sem.event_id = EP.event_id
-    JOIN player AS P ON P.player_id = EP.event_recipient_id
-    WHERE SEM.season_id =%s and sem.competition_id=%s
-	GROUP BY(P.player_name)  
-    ORDER BY count_intended_recipient DESC
-    """
-    cursor.execute(query, (seasonIds['2003/2004'],competitionIds['Premier League']))
-    results = cursor.fetchall()
-    return  results
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[0] = (time_val)
 
-# In the Premier League season of 2003/2004, find the teams with the most shots made. Sort them
-# from highest to lowest. Output the team names and the number of shots. Consider the teams that
-# made at least one shot (the lowest number of shots is 1, not 0).
-def q_6():
+    write_csv(execution_time, cursor, connection, 1)
+    return reconnect(cursor, connection)
 
-    query = """
-        Select team.team_name, COUNT(team.team_id) as number_shots 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_shot as ES on sem.event_id = ES.event_id
-        JOIN player AS P ON P.player_id = ES.event_player_id
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on team.team_id = lineup.team_id
-        WHERE SEM.season_id = %s and sem.competition_id=%s
-        GROUP BY(team.team_name)
-        ORDER BY number_shots DESC
-    """
-    cursor.execute(query, (seasonIds['2003/2004'],competitionIds['Premier League']))
-    results = cursor.fetchall()
-    return  results
+def Q_2(cursor, conn, execution_time):
 
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-# Q 7: In the La Liga season of 2020/2021, find the players who made the most through balls. Sort them
-# from highest to lowest. Output the player names and the number of through balls. Consider the
-# players who made at least one through ball pass (the lowest number of through balls is 1, not 0).
-def q_7():
-    query = """
-        Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        WHERE SEM.season_id = %s
-		and sem.competition_id= %s
-		and EP.technique = 'Through Ball'
-        GROUP BY(P.player_name )
-        ORDER BY number_of_through_balls DESC
-    """
-    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
-    results = cursor.fetchall()
-    return  results
+    #==========================================================================    
+    # Enter QUERY within the quotes:
 
+    query = """ """
 
-# Q 8: In the La Liga season of 2020/2021, find the teams that made the most through balls. Sort them
-# from highest to lowest. Output the team names and the number of through balls. Consider the
-# teams with at least one through ball made in a match (the lowest total number of through balls is 1, not
-# 0).
-def q_8():
-    query = """
-           Select team.team_name, COUNT(team.team_id) as number_of_through_balls 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on team.team_id = lineup.team_id
-		WHERE SEM.season_id = %s
-		and sem.competition_id= %s
-		and EP.technique = 'Through Ball'
-        GROUP BY(team.team_id)
-        ORDER BY number_of_through_balls DESC
-    """
-    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
-    results = cursor.fetchall()
-    return  results
+    #==========================================================================
 
-# Q 9: In the La Liga seasons of 2020/2021, 2019/2020, and 2018/2019 combined, find the players that
-# were the most successful in completed dribbles. Sort them from highest to lowest. Output the player
-# names and the number of successful completed dribbles. Consider the players that made at least
-# one successful dribble (the smallest number of successful dribbles is 1, not 0).
-def q_9():
-    query = """
-         Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
-	from competition_season_event_mapping AS SEM 
-	JOIN event_dribble as ED on sem.event_id = ED.event_id
-	JOIN player AS P ON P.player_id = ED.event_player
-	WHERE SEM.season_id IN (%s, %s, %s)
-	and sem.competition_id = %s
-	and ED.outcome = 'Complete'
-	GROUP BY(P.player_name )
-	ORDER BY number_of_through_balls DESC
-    """
-    cursor.execute(query, (seasonIds['2020/2021'],seasonIds['2019/2020'],seasonIds['2018/2019'],competitionIds['La Liga']))
-    results = cursor.fetchall()
-    return  results
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[1] = (time_val)
 
-# Q 10: In the La Liga season of 2020/2021, find the players that were least dribbled past. Sort them from
-# lowest to highest. Output the player names and the number of dribbles. Consider the players
-# that were at least dribbled past once (the lowest number of occurrences of dribbling past the player is 1,
-# not 0).
-def q_10():
-    query = """
-              Select P.player_name, COUNT(P.player_id) as timest_dribbled_past 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_dribbled_past as ED on sem.event_id = ED.event_id
-        JOIN player AS P ON P.player_id = ED.event_player
-        WHERE SEM.season_id = %s
-        and sem.competition_id = %s
-        GROUP BY(P.player_name )
-        ORDER BY timest_dribbled_past ASC
-    """
-    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
-    results = cursor.fetchall()
-    return  results
+    write_csv(execution_time, cursor, connection, 2)
+    return reconnect(cursor, connection)
+    
+def Q_3(cursor, conn, execution_time):
 
-def runAll():
-    q_1()
-    q_2()
-    q_3()
-    q_4()
-    q_5()
-    q_6()
-    q_7()
-    q_8()
-    q_9()
-    q_10()
-if __name__ == '__main__':
-    runAll()
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================    
+    # Enter QUERY within the quotes:
+    
+    query = """ """
+
+    #==========================================================================
+
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[2] = (time_val)
+
+    write_csv(execution_time, cursor, connection, 3)
+    return reconnect(cursor, connection)
+
+def Q_4(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================    
+    # Enter QUERY within the quotes:
+    
+    query = """ """
+
+    #==========================================================================
+
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[3] = (time_val)
+
+    write_csv(execution_time, cursor, connection, 4)
+    return reconnect(cursor, connection)
+
+def Q_5(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================    
+    # Enter QUERY within the quotes:
+    
+    query = """ """
+
+    #==========================================================================
+
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[4] = (time_val)
+
+    write_csv(execution_time, cursor, connection, 5)
+    return reconnect(cursor, connection)
+
+def Q_6(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================    
+    # Enter QUERY within the quotes:
+    
+    query = """ """
+
+    #==========================================================================
+
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[5] = (time_val)
+
+    write_csv(execution_time, cursor, connection, 6)
+    return reconnect(cursor, connection)
+
+def Q_7(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================    
+    # Enter QUERY within the quotes:
+    
+    query = """ """
+
+    #==========================================================================
+
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[6] = (time_val)
+
+    write_csv(execution_time, cursor, connection, 7)
+    return reconnect(cursor, connection)
+
+def Q_8(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================    
+    # Enter QUERY within the quotes:
+    
+    query = """ """
+
+    #==========================================================================
+
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[7] = (time_val)
+
+    write_csv(execution_time, cursor, connection, 8)
+    return reconnect(cursor, connection)
+
+def Q_9(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================    
+    # Enter QUERY within the quotes:
+    
+    query = """ """
+
+    #==========================================================================
+
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[8] = (time_val)
+
+    write_csv(execution_time, cursor, connection, 9)
+    return reconnect(cursor, connection)
+
+def Q_10(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
+
+    #==========================================================================    
+    # Enter QUERY within the quotes:
+    
+    query = """ """
+
+    #==========================================================================
+
+    time_val = get_time(cursor, connection, query)
+    cursor.execute(query)
+    execution_time[9] = (time_val)
+
+    write_csv(execution_time, cursor, connection, 10)
+    return reconnect(cursor, connection)
+
+# Running the queries from the Q_n methods - Do NOT Modify
+#=====================================================
+def run_queries(cursor, conn, dbname):
+
+    execution_time = [0,0,0,0,0,0,0,0,0,0]
+
+    conn = Q_1(cursor, conn, execution_time)
+    conn = Q_2(cursor, conn, execution_time)
+    conn = Q_3(cursor, conn, execution_time)
+    conn = Q_4(cursor, conn, execution_time)
+    conn = Q_5(cursor, conn, execution_time)
+    conn = Q_6(cursor, conn, execution_time)
+    conn = Q_7(cursor, conn, execution_time)
+    conn = Q_8(cursor, conn, execution_time)
+    conn = Q_9(cursor, conn, execution_time)
+    conn = Q_10(cursor, conn, execution_time)
+
+    for i in range(10):
+        print(execution_time[i])
+
+''' MAIN '''
+try:
+    if __name__ == "__main__":
+
+        dbname = root_database_name
+        user = db_username
+        password = db_password
+        host = db_host
+        port = db_port
+
+        conn = psycopg.connect(dbname=dbname, user=user, password=password, host=host, port=port)
+        cursor = conn.cursor()
+        
+        run_queries(cursor, conn, dbname)
+except Exception as error:
+    print(error)
+    #print("[ERROR]: Failure to connect to database.")
+#_______________________________________________________
