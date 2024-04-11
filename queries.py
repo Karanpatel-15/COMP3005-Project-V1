@@ -74,7 +74,8 @@ def q_3():
     FROM competition_season_event_mapping AS sem
     JOIN event_shot AS es ON sem.event_id = es.event_id
     JOIN player AS p ON p.player_id = es.event_player_id
-    WHERE sem.season_id IN (%s,%s,%s) and sem.competition_id=%s and es.event_first_time = true
+    WHERE sem.season_id IN (%s,%s,%s) and sem.competition_id=%s 
+    and es.event_first_time = true
     GROUP BY p.player_name
     HAVING COUNT(es.event_id) >= 1
     ORDER BY first_time_shots DESC;
@@ -108,12 +109,12 @@ def q_4():
 def q_5():
 
     query = """
-        Select P.player_name, COUNT(P.player_id) as passes_received from competition_season_event_mapping AS SEM 
+      Select P.player_name,  COUNT(EP.event_recipient_id) as count_intended_recipient from competition_season_event_mapping AS SEM 
     JOIN event_pass as EP on sem.event_id = EP.event_id
-    JOIN player AS P ON P.player_id = EP.event_player
-    WHERE SEM.season_id = %s and sem.competition_id=%s
-    GROUP BY(P.player_id)    
-    ORDER BY passes_received DESC
+    JOIN player AS P ON P.player_id = EP.event_recipient_id
+    WHERE SEM.season_id =%s and sem.competition_id=%s
+	GROUP BY(P.player_name)  
+    ORDER BY count_intended_recipient DESC
     """
     cursor.execute(query, (seasonIds['2003/2004'],competitionIds['Premier League']))
     results = cursor.fetchall()
