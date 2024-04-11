@@ -147,10 +147,13 @@ def q_6():
 def q_7():
     print('----q7-----')
 
-if __name__ == '__main__':
+def runAll():
     q_1()
     q_2()
     q_3()
     q_4()
     q_5()
     q_6()
+
+if __name__ == '__main__':
+    runAll()
