@@ -145,7 +145,82 @@ def q_6():
 # from highest to lowest. Output the player names and the number of through balls. Consider the
 # players who made at least one through ball pass (the lowest number of through balls is 1, not 0).
 def q_7():
-    print('----q7-----')
+    query = """
+        Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
+        from competition_season_event_mapping AS SEM 
+        JOIN event_pass as EP on sem.event_id = EP.event_id
+        JOIN player AS P ON P.player_id = EP.event_player
+        WHERE SEM.season_id = %s
+		and sem.competition_id= %s
+		and EP.technique = 'Through Ball'
+        GROUP BY(P.player_name )
+        ORDER BY number_of_through_balls DESC
+    """
+    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
+    results = cursor.fetchall()
+    return  results
+
+
+# Q 8: In the La Liga season of 2020/2021, find the teams that made the most through balls. Sort them
+# from highest to lowest. Output the team names and the number of through balls. Consider the
+# teams with at least one through ball made in a match (the lowest total number of through balls is 1, not
+# 0).
+def q_8():
+    query = """
+           Select team.team_name, COUNT(team.team_id) as number_of_through_balls 
+        from competition_season_event_mapping AS SEM 
+        JOIN event_pass as EP on sem.event_id = EP.event_id
+        JOIN player AS P ON P.player_id = EP.event_player
+        JOIN lineup on lineup.player_id = P.player_id
+        JOIN team on team.team_id = lineup.team_id
+		WHERE SEM.season_id = %s
+		and sem.competition_id= %s
+		and EP.technique = 'Through Ball'
+        GROUP BY(team.team_id)
+        ORDER BY number_of_through_balls DESC
+    """
+    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
+    results = cursor.fetchall()
+    return  results
+
+# Q 9: In the La Liga seasons of 2020/2021, 2019/2020, and 2018/2019 combined, find the players that
+# were the most successful in completed dribbles. Sort them from highest to lowest. Output the player
+# names and the number of successful completed dribbles. Consider the players that made at least
+# one successful dribble (the smallest number of successful dribbles is 1, not 0).
+def q_9():
+    query = """
+         Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
+	from competition_season_event_mapping AS SEM 
+	JOIN event_dribble as ED on sem.event_id = ED.event_id
+	JOIN player AS P ON P.player_id = ED.event_player
+	WHERE SEM.season_id IN (%s, %s, %s)
+	and sem.competition_id = %s
+	and ED.outcome = 'Complete'
+	GROUP BY(P.player_name )
+	ORDER BY number_of_through_balls DESC
+    """
+    cursor.execute(query, (seasonIds['2020/2021'],seasonIds['2019/2020'],seasonIds['2018/2019'],competitionIds['La Liga']))
+    results = cursor.fetchall()
+    return  results
+
+# Q 10: In the La Liga season of 2020/2021, find the players that were least dribbled past. Sort them from
+# lowest to highest. Output the player names and the number of dribbles. Consider the players
+# that were at least dribbled past once (the lowest number of occurrences of dribbling past the player is 1,
+# not 0).
+def q_10():
+    query = """
+              Select P.player_name, COUNT(P.player_id) as timest_dribbled_past 
+        from competition_season_event_mapping AS SEM 
+        JOIN event_dribbled_past as ED on sem.event_id = ED.event_id
+        JOIN player AS P ON P.player_id = ED.event_player
+        WHERE SEM.season_id = %s
+        and sem.competition_id = %s
+        GROUP BY(P.player_name )
+        ORDER BY timest_dribbled_past ASC
+    """
+    cursor.execute(query, (seasonIds['2020/2021'],competitionIds['La Liga']))
+    results = cursor.fetchall()
+    return  results
 
 def runAll():
     q_1()
@@ -154,6 +229,9 @@ def runAll():
     q_4()
     q_5()
     q_6()
-
+    q_7()
+    q_8()
+    q_9()
+    q_10()
 if __name__ == '__main__':
     runAll()
