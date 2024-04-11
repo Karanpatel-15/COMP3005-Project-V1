@@ -191,7 +191,7 @@ def q_9():
 	JOIN player AS P ON P.player_id = ED.event_player
 	WHERE SEM.season_id IN (%s, %s, %s)
 	and sem.competition_id = %s
-	and ED.outcome = 'Complete'
+	and ED.event_outcome = 'Complete'
 	GROUP BY(P.player_name )
 	ORDER BY number_of_through_balls DESC
     """
