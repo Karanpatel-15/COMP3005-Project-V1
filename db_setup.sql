@@ -541,7 +541,7 @@ CREATE TABLE IF NOT EXISTS own_goal_against (
 );
 
 CREATE TABLE IF NOT EXISTS own_goal_for (
-    event_id UUID PRIMARY KEY,
+    event_id UUID,
     event_player INTEGER,
     event_position VARCHAR(100),
     event_team_id INTEGER,
