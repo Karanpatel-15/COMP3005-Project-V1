@@ -193,7 +193,15 @@ def Q_2(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
 
-    query = """ """
+    query = """
+         SELECT player_name, COUNT(SEM.event_id) as number_shots
+      FROM competition_season_event_mapping AS SEM
+      JOIN event_shot ON SEM.event_id = event_shot.event_id
+      JOIN player ON player.player_id = event_shot.event_player_id
+      WHERE SEM.season_id = 90 and SEM.competition_id = 11 and event_shot.event_statsbomb_xg > 0
+      GROUP BY player_name
+      ORDER BY number_shots DESC
+     """
 
     #==========================================================================
 
@@ -212,7 +220,19 @@ def Q_3(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
     
-    query = """ """
+    query = """
+       SELECT 
+        p.player_name, 
+        COUNT(es.event_id) AS first_time_shots
+    FROM competition_season_event_mapping AS sem
+    JOIN event_shot AS es ON sem.event_id = es.event_id
+    JOIN player AS p ON p.player_id = es.event_player_id
+    WHERE sem.season_id IN (90,42,4) and sem.competition_id=11
+    and es.event_first_time = true
+    GROUP BY p.player_name
+    HAVING COUNT(es.event_id) >= 1
+    ORDER BY first_time_shots DESC;
+     """
 
     #==========================================================================
 
@@ -230,7 +250,16 @@ def Q_4(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
     
-    query = """ """
+    query = """
+     Select team.team_name, COUNT(team.team_id) as number_of_passes from competition_season_event_mapping AS SEM 
+        JOIN event_pass as EP on sem.event_id = EP.event_id
+        JOIN player AS P ON P.player_id = EP.event_player
+        JOIN lineup on lineup.player_id = P.player_id
+        JOIN team on lineup.team_id = team.team_id
+        WHERE SEM.season_id = 90 and sem.competition_id=11
+        GROUP BY (team.team_id)
+        ORDER BY number_of_passes DESC
+     """
 
     #==========================================================================
 
@@ -248,7 +277,14 @@ def Q_5(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
     
-    query = """ """
+    query = """
+       Select P.player_name,  COUNT(EP.event_recipient_id) as count_intended_recipient from competition_season_event_mapping AS SEM 
+    JOIN event_pass as EP on sem.event_id = EP.event_id
+    JOIN player AS P ON P.player_id = EP.event_recipient_id
+    WHERE SEM.season_id =44 and sem.competition_id=2
+	GROUP BY(P.player_name)  
+    ORDER BY count_intended_recipient DESC
+     """
 
     #==========================================================================
 
@@ -266,7 +302,17 @@ def Q_6(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
     
-    query = """ """
+    query = """
+     Select team.team_name, COUNT(team.team_id) as number_shots 
+        from competition_season_event_mapping AS SEM 
+        JOIN event_shot as ES on sem.event_id = ES.event_id
+        JOIN player AS P ON P.player_id = ES.event_player_id
+        JOIN lineup on lineup.player_id = P.player_id
+        JOIN team on team.team_id = lineup.team_id
+        WHERE SEM.season_id = 44 and sem.competition_id=2
+        GROUP BY(team.team_name)
+        ORDER BY number_shots DESC
+     """
 
     #==========================================================================
 
@@ -284,7 +330,17 @@ def Q_7(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
     
-    query = """ """
+    query = """
+     Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
+        from competition_season_event_mapping AS SEM 
+        JOIN event_pass as EP on sem.event_id = EP.event_id
+        JOIN player AS P ON P.player_id = EP.event_player
+        WHERE SEM.season_id = 90
+		and sem.competition_id= 11
+		and EP.technique = 'Through Ball'
+        GROUP BY(P.player_name )
+        ORDER BY number_of_through_balls DESC
+     """
 
     #==========================================================================
 
@@ -302,7 +358,19 @@ def Q_8(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
     
-    query = """ """
+    query = """
+    Select team.team_name, COUNT(team.team_id) as number_of_through_balls 
+        from competition_season_event_mapping AS SEM 
+        JOIN event_pass as EP on sem.event_id = EP.event_id
+        JOIN player AS P ON P.player_id = EP.event_player
+        JOIN lineup on lineup.player_id = P.player_id
+        JOIN team on team.team_id = lineup.team_id
+		WHERE SEM.season_id = 90
+		and sem.competition_id= 11
+		and EP.technique = 'Through Ball'
+        GROUP BY(team.team_id)
+        ORDER BY number_of_through_balls DESC
+    """
 
     #==========================================================================
 
@@ -320,7 +388,17 @@ def Q_9(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
     
-    query = """ """
+    query = """
+     Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
+	from competition_season_event_mapping AS SEM 
+	JOIN event_dribble as ED on sem.event_id = ED.event_id
+	JOIN player AS P ON P.player_id = ED.event_player
+	WHERE SEM.season_id IN (90, 42, 4)
+	and sem.competition_id = 11
+	and ED.event_outcome = 'Complete'
+	GROUP BY(P.player_name )
+	ORDER BY number_of_through_balls DESC
+     """
 
     #==========================================================================
 
@@ -338,7 +416,16 @@ def Q_10(cursor, conn, execution_time):
     #==========================================================================    
     # Enter QUERY within the quotes:
     
-    query = """ """
+    query = """
+     Select P.player_name, COUNT(P.player_id) as timest_dribbled_past 
+        from competition_season_event_mapping AS SEM 
+        JOIN event_dribbled_past as ED on sem.event_id = ED.event_id
+        JOIN player AS P ON P.player_id = ED.event_player
+        WHERE SEM.season_id = 90
+        and sem.competition_id = 11
+        GROUP BY(P.player_name )
+        ORDER BY timest_dribbled_past ASC
+     """
 
     #==========================================================================
 
