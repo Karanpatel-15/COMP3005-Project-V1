@@ -181,7 +181,6 @@ CREATE TABLE IF NOT EXISTS event_bad_behaviour (
     UNIQUE (event_id)
 );
 
---not sure about ball receipt 
 CREATE TABLE IF NOT EXISTS event_ball_receipt (
     event_id UUID,
     event_player INTEGER,
@@ -194,7 +193,7 @@ CREATE TABLE IF NOT EXISTS event_ball_receipt (
     event_outcome VARCHAR(100),
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     FOREIGN KEY (event_player) REFERENCES player(player_id),
-    FOREIGN KEY (event_possession_team_id) REFERENCES team(event_possession_team_id),
+    FOREIGN KEY (event_possession_team_id) REFERENCES team(team_id),
     UNIQUE (event_id)
 );
 
@@ -212,7 +211,7 @@ CREATE TABLE IF NOT EXISTS event_ball_recovery (
     event_off_camera BOOLEAN,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     FOREIGN KEY (event_player) REFERENCES player(player_id),
-    FOREIGN KEY (event_possession_team_id) REFERENCES team(event_possession_team_id),
+    FOREIGN KEY (event_possession_team_id) REFERENCES team(team_id),
     UNIQUE (event_id)
 );
 
@@ -232,11 +231,9 @@ CREATE TABLE IF NOT EXISTS event_block (
     event_save_block BOOLEAN,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     FOREIGN KEY (event_player) REFERENCES player(player_id),
-    FOREIGN KEY (event_possession_team_id) REFERENCES team(event_possession_team_id),
+    FOREIGN KEY (event_possession_team_id) REFERENCES team(team_id),
     UNIQUE (event_id)
 );
-
---don't know what the enum type name is for 
 
 CREATE TABLE IF NOT EXISTS event_carry (
     event_id UUID,
@@ -277,7 +274,7 @@ CREATE TABLE IF NOT EXISTS event_clearance (
     UNIQUE (event_id)
 );
 
-CREATE TABLE IF NOT EXISTS event_disposessed (
+CREATE TABLE IF NOT EXISTS event_dispossessed (
     event_id UUID,
     event_player INTEGER,
     event_position VARCHAR(100),
@@ -507,7 +504,7 @@ CREATE TABLE IF NOT EXISTS event_offside (
 
 -- ___________ Arhaan ___________ (Own Goal to Tactical Shift)
 
-CREATE TABLE IF NOT EXISTS own_goal_against (
+CREATE TABLE IF NOT EXISTS event_own_goal_against (
     event_id UUID,
     event_player INTEGER,
     event_position VARCHAR(100),
@@ -521,7 +518,7 @@ CREATE TABLE IF NOT EXISTS own_goal_against (
     UNIQUE (event_id)
 );
 
-CREATE TABLE IF NOT EXISTS own_goal_for (
+CREATE TABLE IF NOT EXISTS event_own_goal_for (
     event_id UUID PRIMARY KEY,
     event_player INTEGER,
     event_position VARCHAR(100),
@@ -563,7 +560,6 @@ CREATE TABLE IF NOT EXISTS event_pass (
     FOREIGN KEY (event_recipient_id) REFERENCES player(player_id),
     UNIQUE (event_id)
 );
-
 
 CREATE TABLE IF NOT EXISTS event_playerOff (
     event_id UUID,
