@@ -701,7 +701,6 @@ CREATE TABLE IF NOT EXISTS event_substitution (
     UNIQUE (event_id)
 );
 
---not sure about this about line up
 CREATE TABLE IF NOT EXISTS event_tactical_shift (
     event_id UUID,
     event_duration FLOAT,
