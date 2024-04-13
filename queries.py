@@ -248,7 +248,7 @@ def Q_4(cursor, conn, execution_time):
     query = """
      Select event_pass.team_name, COUNT(team_name) as total_passes from 
         event_pass where 
-        event_pass.event_season_id = 90 and event_pass.event_competition_id=11
+        event_pass.CID_SID = '11_90'
         GROUP BY team_name
         ORDER BY total_passes DESC
      """

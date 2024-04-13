@@ -539,6 +539,7 @@ CREATE TABLE IF NOT EXISTS event_pass (
     event_season_id INTEGER,
     event_competition_id INTEGER,
     event_recipient_id INTEGER,
+    CID_SID VARCHAR(10),
     team_id INTEGER,
     team_name VARCHAR(100),
     length FLOAT,
