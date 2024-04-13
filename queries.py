@@ -426,9 +426,12 @@ def run_queries(cursor, conn, dbname):
     conn = Q_9(cursor, conn, execution_time)
     conn = Q_10(cursor, conn, execution_time)
 
+    sums = 0
     for i in range(10):
         print(execution_time[i])
-
+        # 'Execution Time: 2.25 ms'
+        sums += float(execution_time[i].split(' ')[2])
+    print(sums)
 ''' MAIN '''
 try:
     if __name__ == "__main__":

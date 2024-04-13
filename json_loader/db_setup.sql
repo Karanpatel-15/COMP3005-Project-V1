@@ -748,3 +748,6 @@ CLUSTER event_pass USING idx_event_pass_SID_CID;
 
 CREATE INDEX idx_event_driblle_SID_CID ON event_pass USING btree(event_season_id, event_competition_id);
 CLUSTER event_pass USING idx_event_driblle_SID_CID;
+
+CREATE INDEX idx_event_dribbled_past_SID_CID ON event_dribbled_past USING btree(event_season_id, event_competition_id);
+CLUSTER event_dribbled_past USING idx_event_dribbled_past_SID_CID;
