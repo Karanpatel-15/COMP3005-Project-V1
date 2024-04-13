@@ -294,15 +294,10 @@ def Q_6(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select team.team_name, COUNT(team.team_id) as number_shots 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_shot as ES on sem.event_id = ES.event_id
-        JOIN player AS P ON P.player_id = ES.event_player_id
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on team.team_id = lineup.team_id
-        WHERE SEM.season_id = 44 and sem.competition_id=2
-        GROUP BY(team.team_name)
-        ORDER BY number_shots DESC
+     SELECT event_team_id, COUNT(event_team_id) AS number_shots
+    FROM public.event_shot
+    WHERE event_season_id = 44 AND event_competition_id = 2
+    GROUP BY event_team_id, event_team_name
      """
 
     #==========================================================================
