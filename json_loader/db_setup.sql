@@ -535,8 +535,11 @@ CREATE TABLE IF NOT EXISTS event_own_goal_for (
 
 CREATE TABLE IF NOT EXISTS event_pass (
     event_id UUID,
-    event_player INTEGER,
+    event_player_id INTEGER,
+    event_season_id INTEGER,
+    event_competition_id INTEGER,
     event_recipient_id INTEGER,
+    team_id INTEGER,
     length FLOAT,
     angle FLOAT,
     height VARCHAR(100),
@@ -556,7 +559,7 @@ CREATE TABLE IF NOT EXISTS event_pass (
     outcome VARCHAR(100),
     technique VARCHAR(100),
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_player_id) REFERENCES player(player_id),
     FOREIGN KEY (event_recipient_id) REFERENCES player(player_id),
     UNIQUE (event_id)
 );
@@ -716,5 +719,5 @@ CREATE TABLE IF NOT EXISTS event_tactical_shift (
 
 
 -- INDEXES
-CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON competition_season USING hash(event_season_id);
+CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON event_shot USING hash(event_season_id);
 

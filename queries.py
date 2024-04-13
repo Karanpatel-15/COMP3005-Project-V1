@@ -246,12 +246,12 @@ def Q_4(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select team.team_name, COUNT(team.team_id) as number_of_passes from competition_season_event_mapping AS SEM 
+     Select teamId, COUNT(team.team_id) as number_of_passes from 
+     competition_season_event_mapping AS SEM 
         JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on lineup.team_id = team.team_id
+        JOIN player AS P ON P.player_id = EP.event_player_id
         WHERE SEM.season_id = 90 and sem.competition_id=11
+        and outcome NOT IN ('Incomplete', 'Out')  
         GROUP BY (team.team_id)
         ORDER BY number_of_passes DESC
      """
@@ -439,8 +439,8 @@ def run_queries(cursor, conn, dbname):
 
     # conn = Q_1(cursor, conn, execution_time)
     # conn = Q_2(cursor, conn, execution_time)
-    conn = Q_3(cursor, conn, execution_time)
-    # conn = Q_4(cursor, conn, execution_time)
+    # conn = Q_3(cursor, conn, execution_time)
+    conn = Q_4(cursor, conn, execution_time)
     # conn = Q_5(cursor, conn, execution_time)
     # conn = Q_6(cursor, conn, execution_time)
     # conn = Q_7(cursor, conn, execution_time)
