@@ -246,14 +246,11 @@ def Q_4(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select teamId, COUNT(team.team_id) as number_of_passes from 
-     competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player_id
-        WHERE SEM.season_id = 90 and sem.competition_id=11
-        and outcome NOT IN ('Incomplete', 'Out')  
-        GROUP BY (team.team_id)
-        ORDER BY number_of_passes DESC
+     Select team_id, COUNT(team_id) as total_passes from 
+        event_pass where 
+        event_pass.event_season_id = 90 and event_pass.event_competition_id=11
+        GROUP BY team_id
+        ORDER BY total_passes DESC
      """
 
     #==========================================================================

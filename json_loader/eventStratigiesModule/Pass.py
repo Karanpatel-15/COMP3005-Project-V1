@@ -12,6 +12,7 @@ class Strategy:
             "event_competition_id": payload.get("competition_id", None),
             "event_player_id" : payload.get("player", {}).get("id", None),
             "team_id": payload.get("team", {}).get("id", None),
+            "team_name": payload.get("team", {}).get("name", None),
             "event_recipient_id" : pass_payload.get("recipient", {}).get("id", None),
             "length" : pass_payload.get("length", None),
             "event_recipient_id" : pass_payload.get("recipient", {}).get("id", None),

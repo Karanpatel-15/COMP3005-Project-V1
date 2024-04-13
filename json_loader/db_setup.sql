@@ -540,6 +540,7 @@ CREATE TABLE IF NOT EXISTS event_pass (
     event_competition_id INTEGER,
     event_recipient_id INTEGER,
     team_id INTEGER,
+    team_name VARCHAR(100),
     length FLOAT,
     angle FLOAT,
     height VARCHAR(100),
