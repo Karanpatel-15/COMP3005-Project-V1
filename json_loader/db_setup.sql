@@ -727,6 +727,7 @@ CREATE TABLE IF NOT EXISTS event_tactical_shift (
 
 
 -- INDEXES
-CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON event_shot USING hash(event_season_id);
+CREATE INDEX idx_event_shot_season_id ON event_shot USING btree(event_season_id, event_competition_id);
+-- CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON event_shot USING hash(event_season_id);
 -- CREATE INDEX idx_event_pass_CID ON event_pass USING hash(CID_SID);
 CREATE INDEX idx_event_pass_SID_CID ON event_pass USING btree(event_season_id, event_competition_id);
