@@ -11,6 +11,7 @@ class Strategy:
             "event_season_id": payload.get("season_id", None),
             "event_competition_id": payload.get("competition_id", None),
             "event_player_id" : payload.get("player", {}).get("id", None),
+            "event_player_name" : payload.get("player", {}).get("name", None),
             "event_team_id": payload.get("team", {}).get("id", None),
             "event_team_name": payload.get("team", {}).get("name", None),
             "CID_SID": str(payload.get("competition_id", None)) + "_" + str(payload.get("season_id", None)),
@@ -39,11 +40,3 @@ class Strategy:
         cols = upsertPayload.keys()
         vals = list(upsertPayload.values())
         insert_or_ignore(cursor, "event_pass" ,cols, vals)
-
-
-
-
-
-
-        
-

@@ -536,6 +536,7 @@ CREATE TABLE IF NOT EXISTS event_own_goal_for (
 CREATE TABLE IF NOT EXISTS event_pass (
     event_id UUID,
     event_player_id INTEGER,
+    event_player_name VARCHAR(100),
     event_season_id INTEGER,
     event_competition_id INTEGER,
     event_recipient_id INTEGER,
