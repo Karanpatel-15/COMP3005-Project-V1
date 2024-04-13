@@ -717,20 +717,18 @@ CREATE TABLE IF NOT EXISTS event_startingXI (
 
 CREATE TABLE IF NOT EXISTS event_substitution (
     event_id UUID,
-    event_player_out INTEGER,
-    event_player_replacement INTEGER,
-    event_timestamp VARCHAR(20),
+    event_player_id INTEGER,
+    event_player_replacement_id INTEGER,
     event_duration FLOAT,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (event_player_out) REFERENCES player(player_id),
-    FOREIGN KEY (event_player_replacement) REFERENCES player(player_id),
+    FOREIGN KEY (event_player_id) REFERENCES player(player_id),
+    FOREIGN KEY (event_player_replacement_id) REFERENCES player(player_id),
     UNIQUE (event_id)
 );
 
 CREATE TABLE IF NOT EXISTS event_tactical_shift (
     event_id UUID,
     event_duration FLOAT,
-    event_timestamp VARCHAR(20),
     event_formations INTEGER,
     event_lineup INTEGER,
     FOREIGN KEY (event_id) REFERENCES event(event_id),

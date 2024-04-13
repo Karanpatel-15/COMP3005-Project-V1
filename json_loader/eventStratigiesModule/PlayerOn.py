@@ -19,11 +19,9 @@ class Strategy:
             "event_id": event_id,
             "event_player": event_player_id,
             "event_position": event_position,
-            "event_team_id": event_team_id,
             "event_location_x": event_location_x,
             "event_location_y": event_location_y,
             "event_duration": event_duration,
-            "event_under_pressure": event_under_pressure
         }
 
         # Extracting column names and values

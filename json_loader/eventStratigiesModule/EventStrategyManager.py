@@ -4,7 +4,7 @@ from eventStratigiesModule import Block, Carry, Clearance, Dispossessed, Duel
 from eventStratigiesModule import Error, FoulCommitted, FoulWon, FreezeFrame
 from eventStratigiesModule import HalfEnd, HalfStart, InjuryStoppage, Interception, Miscontrol
 from eventStratigiesModule import PlayerOff, PlayerOn
-from eventStratigiesModule import Pressure, RefereeBallDrop, Shield#, StartingXI, Substitution, TacticalShift
+from eventStratigiesModule import Pressure, RefereeBallDrop, Shield, Substitution
 class EventStrategyManager:
     def __init__(self):
         self._strategies = {
@@ -19,24 +19,18 @@ class EventStrategyManager:
             DribblePast.id: DribblePast.Strategy(),
             Error.id: Error.Strategy(),
             Duel.id: Duel.Strategy(),
-            # FoulCommitted.id: FoulCommitted.Strategy(),
             FoulWon.id: FoulWon.Strategy(),
-            # FreezeFrame.id: FreezeFrame.Strategy(),
             HalfEnd.id: HalfEnd.Strategy(),
             HalfStart.id: HalfStart.Strategy(),
             InjuryStoppage.id: InjuryStoppage.Strategy(),
             Interception.id: Interception.Strategy(),
             Miscontrol.id: Miscontrol.Strategy(),
-            # OwnGoalAgainst.id: OwnGoalAgainst.Strategy(),
-            # OwnGoalFor.id: OwnGoalFor.Strategy(),
             PlayerOff.id: PlayerOff.Strategy(),
             PlayerOn.id: PlayerOn.Strategy(),
             Pressure.id: Pressure.Strategy(),
             RefereeBallDrop.id: RefereeBallDrop.Strategy(),
             Shield.id: Shield.Strategy(),
-            # StartingXI.id: StartingXI.Strategy(),
-            # Substitution.id: Substitution.Strategy(),
-            # TacticalShift.id: TacticalShift.Strategy(),
+            Substitution.id: Substitution.Strategy(),
             Shot.id: Shot.Strategy(),
             Pass.id: Pass.Strategy(),
         }
