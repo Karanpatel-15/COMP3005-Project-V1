@@ -246,10 +246,10 @@ def Q_4(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select event_pass.team_name, COUNT(team_name) as total_passes from 
+     Select event_pass.event_team_name, COUNT(event_team_name) as total_passes from 
         event_pass where 
         event_pass.CID_SID = '11_90'
-        GROUP BY team_name
+        GROUP BY event_team_name
         ORDER BY total_passes DESC
      """
 
@@ -294,10 +294,10 @@ def Q_6(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     SELECT event_team_id, COUNT(event_team_id) AS number_shots
+     SELECT event_team_name, COUNT(event_team_id) AS number_shots
     FROM public.event_shot
     WHERE event_season_id = 44 AND event_competition_id = 2
-    GROUP BY event_team_id, event_team_name
+    GROUP BY event_team_name
      """
 
     #==========================================================================
@@ -317,15 +317,11 @@ def Q_7(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        WHERE SEM.season_id = 90
-		and sem.competition_id= 11
-		and EP.technique = 'Through Ball'
-        GROUP BY(P.player_name )
-        ORDER BY number_of_through_balls DESC
+     SELECT event_player_name, COUNT(event_player_id) AS number_of_through_balls
+    FROM event_pass
+    WHERE event_season_id = 90 AND event_competition_id = 11 AND technique = 'Through Ball'
+    GROUP BY event_player_name
+	ORDER BY number_of_through_balls DESC
      """
 
     #==========================================================================
@@ -345,17 +341,10 @@ def Q_8(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-    Select team.team_name, COUNT(team.team_id) as number_of_through_balls 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on team.team_id = lineup.team_id
-		WHERE SEM.season_id = 90
-		and sem.competition_id= 11
-		and EP.technique = 'Through Ball'
-        GROUP BY(team.team_id)
-        ORDER BY number_of_through_balls DESC
+    SELECT event_team_id, COUNT(event_team_id) AS number_of_through_balls
+    FROM public.event_pass
+    WHERE event_season_id = 90 AND event_competition_id = 11 AND technique = 'Through Ball'
+    GROUP BY event_team_id
     """
 
     #==========================================================================
@@ -429,15 +418,15 @@ def run_queries(cursor, conn, dbname):
     execution_time = [0,0,0,0,0,0,0,0,0,0]
 
     conn = Q_1(cursor, conn, execution_time)
-    # conn = Q_2(cursor, conn, execution_time)
-    # conn = Q_3(cursor, conn, execution_time)
-    # conn = Q_4(cursor, conn, execution_time)
+    conn = Q_2(cursor, conn, execution_time)
+    conn = Q_3(cursor, conn, execution_time)
+    conn = Q_4(cursor, conn, execution_time)
     conn = Q_5(cursor, conn, execution_time)
-    # conn = Q_6(cursor, conn, execution_time)
-    # conn = Q_7(cursor, conn, execution_time)
-    # conn = Q_8(cursor, conn, execution_time)
-    # conn = Q_9(cursor, conn, execution_time)
-    # conn = Q_10(cursor, conn, execution_time)
+    conn = Q_6(cursor, conn, execution_time)
+    conn = Q_7(cursor, conn, execution_time)
+    conn = Q_8(cursor, conn, execution_time)
+    conn = Q_9(cursor, conn, execution_time)
+    conn = Q_10(cursor, conn, execution_time)
 
     for i in range(10):
         print(execution_time[i])
