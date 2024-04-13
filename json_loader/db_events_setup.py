@@ -53,6 +53,8 @@ def insert_data(cursor, season_id,competition_id, match_id, data):
         #switch case for different event types
         strategy = eventStratigieManager.get_strategy_by_id(event_typeId)
         if strategy is not None:
+            event['competition_id'] = competition_id
+            event['season_id'] = season_id
             strategy.handle(cursor, event)
         else:
             continue
