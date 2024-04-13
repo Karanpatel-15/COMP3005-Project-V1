@@ -1,7 +1,7 @@
 # Created by Gabriel Martell
 
 '''
-Version 1.2 (04/13/2024)
+Version 1.11 (04/02/2024)
 =========================================================
 queries.py (Carleton University COMP3005 - Database Management Student Template Code)
 
@@ -24,21 +24,15 @@ import os
 import re
 
 # Connection Information
-'''
+''' 
 The following is the connection information for this project. These settings are used to connect this file to the autograder.
 You must NOT change these settings - by default, db_host, db_port and db_username are as follows when first installing and utilizing psql.
 For the user "postgres", you must MANUALLY set the password to 1234.
-
-This can be done with the following snippet:
-
-sudo -u postgres psql
-\password postgres
-
 '''
 root_database_name = "postgres"
 query_database_name = "postgres"
 db_username = 'postgres'
-db_password = '1234'
+db_password = 'admin'
 db_host = 'localhost'
 db_port = '5432'
 
@@ -47,21 +41,17 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Loading the Database after Drop - Do NOT Modify
 #================================================
-def load_database(conn):
-    drop_database(conn)
+def load_database(cursor, conn):
+    drop_database(cursor, conn)
 
-    cursor = conn.cursor()
     # Create the Database if it DNE
     try:
         conn.autocommit = True
         cursor.execute(f"CREATE DATABASE {query_database_name};")
         conn.commit()
-
     except Exception as error:
         print(error)
-
     finally:
-        cursor.close()
         conn.autocommit = False
     conn.close()
     
@@ -72,42 +62,40 @@ def load_database(conn):
     host = db_host
     port = db_port
     conn = psycopg.connect(dbname=dbname, user=user, password=password, host=host, port=port)
-
+    cursor = conn.cursor()
+    
     # Import the dbexport.sql database data into this database
     try:
-        command = f'psql -h {host} -U {user} -d {query_database_name} -a -f "{os.path.join(dir_path, "dbexport.sql")}" > /dev/null 2>&1'
+        command = f'psql -h {host} -U {user} -d {query_database_name} -a -f {os.path.join(dir_path, "dbexport.sql")}'
         env = {'PGPASSWORD': password}
         subprocess.run(command, shell=True, check=True, env=env)
 
-    except Exception as error:
-        print(f"An error occurred while loading the database: {error}")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while loading the database: {e}")
     
     # Return this connection.
     return conn    
 
 # Dropping the Database after Query n Execution - Do NOT Modify
 #================================================
-def drop_database(conn):
+def drop_database(cursor, conn):
     # Drop database if it exists.
-
-    cursor = conn.cursor()
-
     try:
         conn.autocommit = True
         cursor.execute(f"DROP DATABASE IF EXISTS {query_database_name};")
         conn.commit()
-
     except Exception as error:
         print(error)
         pass
-
     finally:
-        cursor.close()
         conn.autocommit = False
 
 # Reconnect to Root Database - Do NOT Modify
 #================================================
-def reconnect():
+def reconnect(cursor, conn):
+    cursor.close()
+    conn.close()
+
     dbname = root_database_name
     user = db_username
     password = db_password
@@ -117,7 +105,7 @@ def reconnect():
 
 # Getting the execution time of the query through EXPLAIN ANALYZE - Do NOT Modify
 #================================================
-def get_time(cursor, sql_query):
+def get_time(cursor, conn, sql_query):
     # Prefix your query with EXPLAIN ANALYZE
     explain_query = f"EXPLAIN ANALYZE {sql_query}"
 
@@ -130,7 +118,7 @@ def get_time(cursor, sql_query):
         
         # Convert the output tuples to a single string
         explain_text = "\n".join([row[0] for row in explain_output])
-        
+        print(explain_text)
         # Use regular expression to find the execution time
         # Look for the pattern "Execution Time: <time> ms"
         match = re.search(r"Execution Time: ([\d.]+) ms", explain_text)
@@ -140,14 +128,13 @@ def get_time(cursor, sql_query):
         else:
             print("Execution Time not found in EXPLAIN ANALYZE output.")
             return f"NA"
-        
     except Exception as error:
         print(f"[ERROR] Error getting time.\n{error}")
 
 
 # Write the results into some Q_n CSV. If the is an error with the query, it is a INC result - Do NOT Modify
 #================================================
-def write_csv(execution_time, cursor, i):
+def write_csv(execution_time, cursor, conn, i):
     # Collect all data into this csv, if there is an error from the query execution, the resulting time is INC.
     try:
         colnames = [desc[0] for desc in cursor.description]
@@ -174,268 +161,208 @@ The following 10 methods, (Q_n(), where 1 < n < 10) will be where you are tasked
 To reiterate, any modification outside of the query line will be flagged, and then marked as potential cheating.
 Once you run this script, these 10 methods will run and print the times in order from top to bottom, Q1 to Q10 in the terminal window.
 '''
-def Q_1(conn, execution_time):
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
+def Q_1(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
     #==========================================================================
     # Enter QUERY within the quotes:
 
     query = """
-        SELECT player_name, AVG(event_statsbomb_xg) as avg_xg
-        FROM competition_season_event_mapping AS SEM
-        JOIN event_shot ON SEM.event_id = event_shot.event_id
-        JOIN player ON player.player_id = event_shot.event_player_id
-        WHERE SEM.season_id = 90 and SEM.competition_id = 11 and event_shot.event_statsbomb_xg > 0
-        GROUP BY player_name
+        SELECT event_player_name, AVG(event_statsbomb_xg) as avg_xg
+        FROM event_shot 
+        WHERE event_shot.event_season_id = 90 and event_shot.event_competition_id = 11 
+		and event_shot.event_statsbomb_xg > 0
+        GROUP BY event_player_name
         ORDER BY avg_xg DESC 
     """
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[0] = (time_val)
 
-    write_csv(execution_time, cursor, 1)
+    write_csv(execution_time, cursor, connection, 1)
+    return reconnect(cursor, connection)
 
-    cursor.close()
-    new_conn.close()
+def Q_2(cursor, conn, execution_time):
 
-    return reconnect()
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-def Q_2(conn, execution_time):
-
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
-
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
 
     query = """
-         SELECT player_name, COUNT(SEM.event_id) as number_shots
-      FROM competition_season_event_mapping AS SEM
-      JOIN event_shot ON SEM.event_id = event_shot.event_id
-      JOIN player ON player.player_id = event_shot.event_player_id
-      WHERE SEM.season_id = 90 and SEM.competition_id = 11 and event_shot.event_statsbomb_xg > 0
-      GROUP BY player_name
+      SELECT event_player_name, COUNT(event_id) as number_shots
+      FROM event_shot
+      WHERE event_shot.event_season_id = 90 and event_shot.event_competition_id = 11
+	  and event_shot.event_statsbomb_xg > 0
+      GROUP BY event_player_name
       ORDER BY number_shots DESC
      """
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[1] = (time_val)
 
-    write_csv(execution_time, cursor, 2)
-
-    cursor.close()
-    new_conn.close()
-
-    return reconnect()
+    write_csv(execution_time, cursor, connection, 2)
+    return reconnect(cursor, connection)
     
-def Q_3(conn, execution_time):
+def Q_3(cursor, conn, execution_time):
 
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
-
+    
     query = """
-       SELECT 
-        p.player_name, 
-        COUNT(es.event_id) AS first_time_shots
-    FROM competition_season_event_mapping AS sem
-    JOIN event_shot AS es ON sem.event_id = es.event_id
-    JOIN player AS p ON p.player_id = es.event_player_id
-    WHERE sem.season_id IN (90,42,4) and sem.competition_id=11
-    and es.event_first_time = true
-    GROUP BY p.player_name
-    HAVING COUNT(es.event_id) >= 1
-    ORDER BY first_time_shots DESC;
+         SELECT event_player_name, COUNT(event_id) AS first_time_shots 
+	        FROM event_shot 
+	        WHERE event_season_id IN (90,42,4) and event_competition_id=11 and event_first_time = true
+            GROUP BY event_player_name
+            HAVING COUNT(event_id) >= 1
+            ORDER BY first_time_shots DESC;
      """
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[2] = (time_val)
 
-    write_csv(execution_time, cursor, 3)
+    write_csv(execution_time, cursor, connection, 3)
+    return reconnect(cursor, connection)
 
-    cursor.close()
-    new_conn.close()
+def Q_4(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-    return reconnect()
-
-def Q_4(conn, execution_time):
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
-
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
-
+    
     query = """
-     Select team.team_name, COUNT(team.team_id) as number_of_passes from competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on lineup.team_id = team.team_id
-        WHERE SEM.season_id = 90 and sem.competition_id=11
-        GROUP BY (team.team_id)
-        ORDER BY number_of_passes DESC
+     Select event_pass.event_team_name, COUNT(event_team_name) as total_passes from 
+        event_pass where 
+        event_pass.CID_SID = '11_90'
+        GROUP BY event_team_name
+        ORDER BY total_passes DESC
      """
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[3] = (time_val)
 
-    write_csv(execution_time, cursor, 4)
+    write_csv(execution_time, cursor, connection, 4)
+    return reconnect(cursor, connection)
 
-    cursor.close()
-    new_conn.close()
+def Q_5(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-    return reconnect()
-
-def Q_5(conn, execution_time):
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
-
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
-
+    
     query = """
-       Select P.player_name,  COUNT(EP.event_recipient_id) as count_intended_recipient from competition_season_event_mapping AS SEM 
-    JOIN event_pass as EP on sem.event_id = EP.event_id
-    JOIN player AS P ON P.player_id = EP.event_recipient_id
-    WHERE SEM.season_id =44 and sem.competition_id=2
-	GROUP BY(P.player_name)  
+       Select event_pass.event_recipient_name,  COUNT(event_pass.event_recipient_name) as count_intended_recipient 
+    from event_pass 
+	where event_season_id = 44 and event_competition_id = 2
+	GROUP BY(event_pass.event_recipient_name)  
     ORDER BY count_intended_recipient DESC
      """
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[4] = (time_val)
 
-    write_csv(execution_time, cursor, 5)
+    write_csv(execution_time, cursor, connection, 5)
+    return reconnect(cursor, connection)
 
-    cursor.close()
-    new_conn.close()
+def Q_6(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-    return reconnect()
-
-def Q_6(conn, execution_time):
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
-
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
-
+    
     query = """
-     Select team.team_name, COUNT(team.team_id) as number_shots 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_shot as ES on sem.event_id = ES.event_id
-        JOIN player AS P ON P.player_id = ES.event_player_id
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on team.team_id = lineup.team_id
-        WHERE SEM.season_id = 44 and sem.competition_id=2
-        GROUP BY(team.team_name)
-        ORDER BY number_shots DESC
+     SELECT event_team_name, COUNT(event_team_id) AS number_shots
+    FROM public.event_shot
+    WHERE event_season_id = 44 AND event_competition_id = 2
+    GROUP BY event_team_name
      """
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[5] = (time_val)
 
-    write_csv(execution_time, cursor, 6)
+    write_csv(execution_time, cursor, connection, 6)
+    return reconnect(cursor, connection)
 
-    cursor.close()
-    new_conn.close()
+def Q_7(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-    return reconnect()
-
-
-def Q_7(conn, execution_time):
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
-
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
-
+    
     query = """
-     Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        WHERE SEM.season_id = 90
-		and sem.competition_id= 11
-		and EP.technique = 'Through Ball'
-        GROUP BY(P.player_name )
-        ORDER BY number_of_through_balls DESC
+     SELECT event_player_name, COUNT(event_player_id) AS number_of_through_balls
+    FROM event_pass
+    WHERE event_season_id = 90 AND event_competition_id = 11 AND technique = 'Through Ball'
+    GROUP BY event_player_name
+	ORDER BY number_of_through_balls DESC
      """
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[6] = (time_val)
 
-    write_csv(execution_time, cursor, 7)
+    write_csv(execution_time, cursor, connection, 7)
+    return reconnect(cursor, connection)
 
-    cursor.close()
-    new_conn.close()
+def Q_8(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-    return reconnect()
-
-def Q_8(conn, execution_time):
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
-
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
-
+    
     query = """
-    Select team.team_name, COUNT(team.team_id) as number_of_through_balls 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_pass as EP on sem.event_id = EP.event_id
-        JOIN player AS P ON P.player_id = EP.event_player
-        JOIN lineup on lineup.player_id = P.player_id
-        JOIN team on team.team_id = lineup.team_id
-		WHERE SEM.season_id = 90
-		and sem.competition_id= 11
-		and EP.technique = 'Through Ball'
-        GROUP BY(team.team_id)
-        ORDER BY number_of_through_balls DESC
+    SELECT event_team_id, COUNT(event_team_id) AS number_of_through_balls
+    FROM public.event_pass
+    WHERE event_season_id = 90 AND event_competition_id = 11 AND technique = 'Through Ball'
+    GROUP BY event_team_id
     """
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[7] = (time_val)
 
-    write_csv(execution_time, cursor, 8)
+    write_csv(execution_time, cursor, connection, 8)
+    return reconnect(cursor, connection)
 
-    cursor.close()
-    new_conn.close()
+def Q_9(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-    return reconnect()
-
-def Q_9(conn, execution_time):
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
-
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
-
+    
     query = """
      Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
 	from competition_season_event_mapping AS SEM 
@@ -450,24 +377,20 @@ def Q_9(conn, execution_time):
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[8] = (time_val)
 
-    write_csv(execution_time, cursor, 9)
+    write_csv(execution_time, cursor, connection, 9)
+    return reconnect(cursor, connection)
 
-    cursor.close()
-    new_conn.close()
+def Q_10(cursor, conn, execution_time):
+    connection = load_database(cursor, conn)
+    cursor = connection.cursor()
 
-    return reconnect()
-
-def Q_10(conn, execution_time):
-    new_conn = load_database(conn)
-    cursor = new_conn.cursor()
-
-    #==========================================================================
+    #==========================================================================    
     # Enter QUERY within the quotes:
-
+    
     query = """
      Select P.player_name, COUNT(P.player_id) as timest_dribbled_past 
         from competition_season_event_mapping AS SEM 
@@ -481,33 +404,29 @@ def Q_10(conn, execution_time):
 
     #==========================================================================
 
-    time_val = get_time(cursor, query)
+    time_val = get_time(cursor, connection, query)
     cursor.execute(query)
     execution_time[9] = (time_val)
 
-    write_csv(execution_time, cursor, 10)
-
-    cursor.close()
-    new_conn.close()
-
-    return reconnect()
+    write_csv(execution_time, cursor, connection, 10)
+    return reconnect(cursor, connection)
 
 # Running the queries from the Q_n methods - Do NOT Modify
 #=====================================================
-def run_queries(conn):
+def run_queries(cursor, conn, dbname):
 
     execution_time = [0,0,0,0,0,0,0,0,0,0]
 
-    conn = Q_1(conn, execution_time)
-    conn = Q_2(conn, execution_time)
-    conn = Q_3(conn, execution_time)
-    conn = Q_4(conn, execution_time)
-    conn = Q_5(conn, execution_time)
-    conn = Q_6(conn, execution_time)
-    conn = Q_7(conn, execution_time)
-    conn = Q_8(conn, execution_time)
-    conn = Q_9(conn, execution_time)
-    conn = Q_10(conn, execution_time)
+    conn = Q_1(cursor, conn, execution_time)
+    conn = Q_2(cursor, conn, execution_time)
+    conn = Q_3(cursor, conn, execution_time)
+    conn = Q_4(cursor, conn, execution_time)
+    conn = Q_5(cursor, conn, execution_time)
+    conn = Q_6(cursor, conn, execution_time)
+    conn = Q_7(cursor, conn, execution_time)
+    conn = Q_8(cursor, conn, execution_time)
+    conn = Q_9(cursor, conn, execution_time)
+    conn = Q_10(cursor, conn, execution_time)
 
     for i in range(10):
         print(execution_time[i])
@@ -523,8 +442,9 @@ try:
         port = db_port
 
         conn = psycopg.connect(dbname=dbname, user=user, password=password, host=host, port=port)
+        cursor = conn.cursor()
         
-        run_queries(conn)
+        run_queries(cursor, conn, dbname)
 except Exception as error:
     print(error)
     #print("[ERROR]: Failure to connect to database.")

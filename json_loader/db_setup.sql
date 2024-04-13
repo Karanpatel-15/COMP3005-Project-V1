@@ -535,14 +535,21 @@ CREATE TABLE IF NOT EXISTS event_own_goal_for (
 
 CREATE TABLE IF NOT EXISTS event_pass (
     event_id UUID,
-    event_player INTEGER,
+    event_player_id INTEGER,
+    event_player_name VARCHAR(100),
+    event_season_id INTEGER,
+    event_competition_id INTEGER,
     event_recipient_id INTEGER,
+    event_recipient_name VARCHAR(100),
+    event_team_id INTEGER,
+    event_team_name VARCHAR(100),
+    CID_SID VARCHAR(10),
     length FLOAT,
     angle FLOAT,
     height VARCHAR(100),
     end_location_x FLOAT,
     end_location_y FLOAT,
-    assited_shot VARCHAR(100),
+    assisted_shot VARCHAR(100),
     backheel BOOLEAN,
     deflected BOOLEAN,
     miscommunication BOOLEAN,
@@ -556,7 +563,9 @@ CREATE TABLE IF NOT EXISTS event_pass (
     outcome VARCHAR(100),
     technique VARCHAR(100),
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_player_id) REFERENCES player(player_id),
+    FOREIGN KEY (event_season_id) REFERENCES season(season_id),
+    FOREIGN KEY (event_competition_id) REFERENCES competition(competition_id),
     FOREIGN KEY (event_recipient_id) REFERENCES player(player_id),
     UNIQUE (event_id)
 );
@@ -648,6 +657,7 @@ CREATE TABLE IF NOT EXISTS event_shot (
     event_competition_id INTEGER,
     event_position VARCHAR(100),
     event_team_id INTEGER,
+    event_team_name VARCHAR(100),
     event_location_x FLOAT,
     event_location_y FLOAT,
     event_duration FLOAT,
@@ -671,7 +681,9 @@ CREATE TABLE IF NOT EXISTS event_shot (
     event_saved_off_target BOOLEAN,
     event_freeze_frame_id INTEGER,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (event_player_id) REFERENCES player(player_id),
+    FOREIGN KEY (event_season_id) REFERENCES season(season_id),
+    FOREIGN KEY (event_competition_id) REFERENCES competition(competition_id),
+    FOREIGN KEY (event_team_id) REFERENCES team(team_id),
     FOREIGN KEY (event_team_id) REFERENCES team(team_id),
     FOREIGN KEY (event_freeze_frame_id) REFERENCES freeze_frame(freeze_frame_id),
     UNIQUE (event_id)   
@@ -716,5 +728,7 @@ CREATE TABLE IF NOT EXISTS event_tactical_shift (
 
 
 -- INDEXES
-CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON competition_season USING hash(event_season_id);
-
+CREATE INDEX idx_event_shot_season_id ON event_shot USING btree(event_season_id, event_competition_id);
+-- CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON event_shot USING hash(event_season_id);
+-- CREATE INDEX idx_event_pass_CID ON event_pass USING hash(CID_SID);
+CREATE INDEX idx_event_pass_SID_CID ON event_pass USING btree(event_season_id, event_competition_id);
