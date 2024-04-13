@@ -246,7 +246,7 @@ def Q_4(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select team_id, COUNT(team_id) as total_passes from 
+     Select team_name, COUNT(team_name) as total_passes from 
         event_pass where 
         event_pass.event_season_id = 90 and event_pass.event_competition_id=11
         GROUP BY team_id
