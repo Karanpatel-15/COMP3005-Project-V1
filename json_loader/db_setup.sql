@@ -293,8 +293,11 @@ CREATE TABLE IF NOT EXISTS event_dispossessed (
 
 CREATE TABLE IF NOT EXISTS event_dribble (
     event_id UUID,
-    event_player INTEGER,
+    event_player_id INTEGER,
+    event_player_name VARCHAR(100),
     event_position VARCHAR(100),
+    event_season_id INTEGER,
+    event_competition_id INTEGER,
     event_location_x FLOAT,
     event_location_y FLOAT,
     event_duration FLOAT,
@@ -306,13 +309,18 @@ CREATE TABLE IF NOT EXISTS event_dribble (
     event_nutmeg BOOLEAN,
     event_no_touch BOOLEAN,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_player_id) REFERENCES player(player_id),
+    FOREIGN KEY (event_season_id) REFERENCES season(season_id),
+    FOREIGN KEY (event_competition_id) REFERENCES competition(competition_id),
     UNIQUE (event_id)
 );
 
 CREATE TABLE IF NOT EXISTS event_dribbled_past (
     event_id UUID,
-    event_player INTEGER,
+    event_player_id INTEGER,
+    event_player_name VARCHAR(100),
+    event_season_id INTEGER,
+    event_competition_id INTEGER,
     event_position VARCHAR(100),
     event_location_x FLOAT,
     event_location_y FLOAT,
@@ -320,7 +328,9 @@ CREATE TABLE IF NOT EXISTS event_dribbled_past (
     event_counterpress BOOLEAN,
     event_off_camera BOOLEAN,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (event_player) REFERENCES player(player_id),
+    FOREIGN KEY (event_player_id) REFERENCES player(player_id),
+    FOREIGN KEY (event_season_id) REFERENCES season(season_id),
+    FOREIGN KEY (event_competition_id) REFERENCES competition(competition_id),
     UNIQUE (event_id)
 );
 
@@ -729,6 +739,11 @@ CREATE TABLE IF NOT EXISTS event_tactical_shift (
 
 -- INDEXES
 CREATE INDEX idx_event_shot_season_id ON event_shot USING btree(event_season_id, event_competition_id);
+CLUSTER event_shot USING idx_event_shot_season_id;
 -- CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON event_shot USING hash(event_season_id);
 -- CREATE INDEX idx_event_pass_CID ON event_pass USING hash(CID_SID);
 CREATE INDEX idx_event_pass_SID_CID ON event_pass USING btree(event_season_id, event_competition_id);
+CLUSTER event_pass USING idx_event_pass_SID_CID;
+
+CREATE INDEX idx_event_driblle_SID_CID ON event_pass USING btree(event_season_id, event_competition_id);
+CLUSTER event_pass USING idx_event_driblle_SID_CID;

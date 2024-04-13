@@ -248,7 +248,7 @@ def Q_4(cursor, conn, execution_time):
     query = """
      Select event_pass.event_team_name, COUNT(event_team_name) as total_passes from 
         event_pass where 
-        event_pass.CID_SID = '11_90'
+        event_pass.event_season_id = 90 and event_pass.event_competition_id = 11
         GROUP BY event_team_name
         ORDER BY total_passes DESC
      """
@@ -319,7 +319,8 @@ def Q_7(cursor, conn, execution_time):
     query = """
      SELECT event_player_name, COUNT(event_player_id) AS number_of_through_balls
     FROM event_pass
-    WHERE event_season_id = 90 AND event_competition_id = 11 AND technique = 'Through Ball'
+    WHERE event_season_id = 90 AND event_competition_id = 11 
+    AND technique = 'Through Ball'
     GROUP BY event_player_name
 	ORDER BY number_of_through_balls DESC
      """
@@ -364,14 +365,12 @@ def Q_9(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select P.player_name, COUNT(P.player_id) as number_of_through_balls 
-	from competition_season_event_mapping AS SEM 
-	JOIN event_dribble as ED on sem.event_id = ED.event_id
-	JOIN player AS P ON P.player_id = ED.event_player
-	WHERE SEM.season_id IN (90, 42, 4)
-	and sem.competition_id = 11
-	and ED.event_outcome = 'Complete'
-	GROUP BY(P.player_name )
+     Select event_player_name, COUNT(event_player_name) as number_of_through_balls 
+	from event_dribble 
+	WHERE event_season_id IN (90, 42, 4)
+ 	and event_competition_id = 11
+	and event_outcome = 'Complete'
+	GROUP BY(event_player_name)
 	ORDER BY number_of_through_balls DESC
      """
 
@@ -392,14 +391,13 @@ def Q_10(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select P.player_name, COUNT(P.player_id) as timest_dribbled_past 
-        from competition_season_event_mapping AS SEM 
-        JOIN event_dribbled_past as ED on sem.event_id = ED.event_id
-        JOIN player AS P ON P.player_id = ED.event_player
-        WHERE SEM.season_id = 90
-        and sem.competition_id = 11
-        GROUP BY(P.player_name )
-        ORDER BY timest_dribbled_past ASC
+     Select event_dribbled_past.event_player_name, COUNT(event_dribbled_past.event_player_name) 
+as times_dribbled_past 
+from event_dribbled_past 
+WHERE event_dribbled_past.event_season_id = 90
+and event_dribbled_past.event_competition_id = 11
+GROUP BY(event_dribbled_past.event_player_name)
+ORDER BY times_dribbled_past ASC
      """
 
     #==========================================================================
