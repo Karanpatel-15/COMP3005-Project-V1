@@ -1,288 +1,157 @@
 
 from db_events_setup import insert_or_ignore
 
-id = 16
-
-# CREATE TABLE IF NOT EXISTS event_shot (
-#     id UUID,
-#     player_id INTEGER,
-#     position VARCHAR(100),
-#     team_id INTEGER,
-#     location_x FLOAT,
-#     location_y FLOAT,
-#     duration FLOAT,
-#     out BOOLEAN,
-#     under_pressure BOOLEAN,
-#     off_camera BOOLEAN,
-#     statsbomb_xg FLOAT,
-#     end_location_x FLOAT,
-#     end_location_y FLOAT,
-#     body_part VARCHAR(100),
-#     outcome VARCHAR(100),
-#     first_time BOOLEAN,
-#     technique VARCHAR(100),
-#     deflected BOOLEAN,
-#     one_on_one BOOLEAN,
-#     aerial_won BOOLEAN,
-#     saved_to_post BOOLEAN,
-#     redirect BOOLEAN,
-#     open_goal BOOLEAN,
-#     follows_dribble BOOLEAN,
-#     saved_off_target BOOLEAN,
-#     freeze_frame_id INTEGER,
-#     FOREIGN KEY (id) REFERENCES event(id),
-#     FOREIGN KEY (player) REFERENCES player(player_id),
-#     FOREIGN KEY (team_id) REFERENCES team(team_id),
-#     FOREIGN KEY (freeze_frame_id) REFERENCES freeze_frame(freeze_frame_id),
-#     UNIQUE (id)   
-# );
-
 # {
-#   "id" : "37f411d5-c045-480a-a61a-07c75a099ee2",
-#   "index" : 97,
-#   "period" : 1,
-#   "timestamp" : "00:01:46.003",
-#   "minute" : 1,
-#   "second" : 46,
-#   "type" : {
-#     "id" : 16,
-#     "name" : "Shot"
-#   },
-#   "possession" : 8,
-#   "possession_team" : {
-#     "id" : 210,
-#     "name" : "Real Sociedad"
-#   },
-#   "play_pattern" : {
-#     "id" : 1,
-#     "name" : "Regular Play"
-#   },
-#   "team" : {
-#     "id" : 210,
-#     "name" : "Real Sociedad"
-#   },
-#   "player" : {
-#     "id" : 6721,
-#     "name" : "Willian José da Silva"
-#   },
-#   "position" : {
-#     "id" : 23,
-#     "name" : "Center Forward"
-#   },
-#   "location" : [ 109.8, 40.0 ],
-#   "duration" : 0.527253,
-#   "related_events" : [ "53f45cc2-9e64-40be-8b81-e7c87a922359" ],
-#   "shot" : {
-#     "statsbomb_xg" : 0.087394096,
-#     "end_location" : [ 117.7, 40.0, 0.9 ],
-#     "key_pass_id" : "5bfc601b-0593-439c-95e3-d5b2efeab6d1",
-#     "body_part" : {
-#       "id" : 37,
-#       "name" : "Head"
+#     "id": "1fcda1a4-23c9-42df-8153-6c6142fcc3c7",
+#     "index": 387,
+#     "period": 1,
+#     "timestamp": "00:06:33.123",
+#     "minute": 6,
+#     "second": 33,
+#     "type": {
+#       "id": 16,
+#       "name": "Shot"
 #     },
-#     "type" : {
-#       "id" : 87,
-#       "name" : "Open Play"
+#     "possession": 17,
+#     "possession_team": {
+#       "id": 217,
+#       "name": "Barcelona"
 #     },
-#     "outcome" : {
-#       "id" : 100,
-#       "name" : "Saved"
+#     "play_pattern": {
+#       "id": 4,
+#       "name": "From Throw In"
 #     },
-#     "technique" : {
-#       "id" : 93,
-#       "name" : "Normal"
+#     "team": {
+#       "id": 217,
+#       "name": "Barcelona"
 #     },
-#     "freeze_frame" : [ {
-#       "location" : [ 91.6, 59.6 ],
-#       "player" : {
-#         "id" : 3501,
-#         "name" : "Philippe Coutinho Correia"
+#     "player": {
+#       "id": 5503,
+#       "name": "Lionel Andrés Messi Cuccittini"
+#     },
+#     "position": {
+#       "id": 23,
+#       "name": "Center Forward"
+#     },
+#     "location": [103.3, 51.7],
+#     "duration": 1.188,
+#     "related_events": ["ce77e40f-d09a-4aa6-aa27-092f4f337b69"],
+#     "shot": {
+#       "statsbomb_xg": 0.053563748,
+#       "end_location": [120.0, 35.2, 3.4],
+#       "key_pass_id": "8a2fe20c-4e50-4a02-b518-a94ffd7bbc88",
+#       "technique": {
+#         "id": 93,
+#         "name": "Normal"
 #       },
-#       "position" : {
-#         "id" : 21,
-#         "name" : "Left Wing"
+#       "outcome": {
+#         "id": 98,
+#         "name": "Off T"
 #       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 86.1, 32.6 ],
-#       "player" : {
-#         "id" : 5477,
-#         "name" : "Ousmane Dembélé"
+#       "type": {
+#         "id": 87,
+#         "name": "Open Play"
 #       },
-#       "position" : {
-#         "id" : 17,
-#         "name" : "Right Wing"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 97.7, 54.8 ],
-#       "player" : {
-#         "id" : 5211,
-#         "name" : "Jordi Alba Ramos"
-#       },
-#       "position" : {
-#         "id" : 6,
-#         "name" : "Left Back"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 108.6, 59.8 ],
-#       "player" : {
-#         "id" : 5203,
-#         "name" : "Sergio Busquets i Burgos"
-#       },
-#       "position" : {
-#         "id" : 10,
-#         "name" : "Center Defensive Midfield"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 110.2, 57.1 ],
-#       "player" : {
-#         "id" : 5216,
-#         "name" : "Andrés Iniesta Luján"
-#       },
-#       "position" : {
-#         "id" : 15,
-#         "name" : "Left Center Midfield"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 104.6, 43.4 ],
-#       "player" : {
-#         "id" : 5470,
-#         "name" : "Ivan Rakitić"
-#       },
-#       "position" : {
-#         "id" : 13,
-#         "name" : "Right Center Midfield"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 109.7, 47.4 ],
-#       "player" : {
-#         "id" : 6196,
-#         "name" : "Yerry Fernando Mina González"
-#       },
-#       "position" : {
-#         "id" : 5,
-#         "name" : "Left Center Back"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 111.8, 40.4 ],
-#       "player" : {
-#         "id" : 5213,
-#         "name" : "Gerard Piqué Bernabéu"
-#       },
-#       "position" : {
-#         "id" : 3,
-#         "name" : "Right Center Back"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 110.9, 35.4 ],
-#       "player" : {
-#         "id" : 6374,
-#         "name" : "Nélson Cabral Semedo"
-#       },
-#       "position" : {
-#         "id" : 2,
-#         "name" : "Right Back"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 118.0, 41.3 ],
-#       "player" : {
-#         "id" : 20055,
-#         "name" : "Marc-André ter Stegen"
-#       },
-#       "position" : {
-#         "id" : 1,
-#         "name" : "Goalkeeper"
-#       },
-#       "teammate" : false
-#     }, {
-#       "location" : [ 84.0, 32.3 ],
-#       "player" : {
-#         "id" : 6674,
-#         "name" : "Alberto De La Bella Madureño"
-#       },
-#       "position" : {
-#         "id" : 6,
-#         "name" : "Left Back"
-#       },
-#       "teammate" : true
-#     }, {
-#       "location" : [ 98.3, 50.8 ],
-#       "player" : {
-#         "id" : 6669,
-#         "name" : "David Zurutuza Veillet"
-#       },
-#       "position" : {
-#         "id" : 11,
-#         "name" : "Left Defensive Midfield"
-#       },
-#       "teammate" : true
-#     }, {
-#       "location" : [ 110.3, 61.4 ],
-#       "player" : {
-#         "id" : 6330,
-#         "name" : "Adnan Januzaj"
-#       },
-#       "position" : {
-#         "id" : 12,
-#         "name" : "Right Midfield"
-#       },
-#       "teammate" : true
-#     }, {
-#       "location" : [ 109.6, 45.9 ],
-#       "player" : {
-#         "id" : 6685,
-#         "name" : "Mikel Oyarzabal Ugarte"
-#       },
-#       "position" : {
-#         "id" : 16,
-#         "name" : "Left Midfield"
-#       },
-#       "teammate" : true
-#     }, {
-#       "location" : [ 106.2, 33.0 ],
-#       "player" : {
-#         "id" : 6695,
-#         "name" : "Juan Miguel Jiménez López"
-#       },
-#       "position" : {
-#         "id" : 19,
-#         "name" : "Center Attacking Midfield"
-#       },
-#       "teammate" : true
-#     } ]
+#       "body_part": {
+#         "id": 38,
+#         "name": "Left Foot"
+#       }
+#     }
 #   }
-# }
+
+id = 16
 class Strategy:
     def handle(self,cursor,payload):
-        # print("Inserting Shot  " + str(payload))
-        if (payload.get('shot', None) == None):
-            # print("Shot is None")
-            return
+        # SELECT event_id, event_player_id, event_player_name, event_season_id, event_competition_id, event_position, event_team_id, event_location_x, event_location_y, event_duration, event_out, event_under_pressure, event_off_camera, event_statsbomb_xg, end_location_x, end_location_y, event_body_part, event_outcome, event_first_time, event_technique, event_deflected, event_one_on_one, event_aerial_won, event_saved_to_post, event_redirect, event_open_goal, event_follows_dribble, event_saved_off_target
 
+#         export interface Shot {
+#     id: string;
+#     index: number;
+#     period: number;
+#     timestamp: string;
+#     minute: number;
+#     second: number;
+#     type: Foreign;
+#     possession: number;
+#     possession_team: Foreign;
+#     play_pattern: Foreign;
+#     team: Foreign;
+#     player: Foreign;
+#     position: Foreign;
+#     location: number[];
+#     duration: number;
+#     shot: ShotClass;
+#     under_pressure: boolean;
+#     out: boolean;
+#     off_camera: boolean;
+# }
+
+# export interface Foreign {
+#     id: number;
+#     name: string;
+# }
+
+# export interface ShotClass {
+#     statsbomb_xg: number;
+#     end_location: number[];
+#     key_pass_id: string | null;
+#     body_part: Foreign;
+#     type: Foreign;
+#     outcome: Foreign;
+#     first_time: boolean;
+#     technique: Foreign;
+#     freeze_frame: FreezeFrame[] | null;
+#     deflected: boolean;
+#     one_on_one: boolean;
+#     aerial_won: boolean;
+#     saved_to_post: boolean;
+#     redirect: boolean;
+#     open_goal: boolean;
+#     follows_dribble: boolean;
+#     saved_off_target: boolean;
+# }
+        shot_payload = payload.get('shot', {})
         event_id = payload.get('id', None)
-        player_id = payload.get('player').get('id')
-        event_player_name = payload.get('player').get('name')
-        event_statsbomb_xg = payload.get('shot', None).get('statsbomb_xg')
-        event_first_time = payload.get('shot', None).get('first_time')
         competition_id = payload.get('competition_id')
         season_id = payload.get('season_id')
-        payload = {
+        event_team_id = payload.get('team', {}).get('id', None)
+        event_team_name = payload.get('team', {}).get('name', None)
+        player_id = payload.get('player').get('id', None)
+        event_player_name = payload.get('player', None).get('name', None)
+        event_position = payload.get('position', {}).get('name', None)
+        event_location_x = payload.get('location', [0, 0])[0]
+        event_location_y = payload.get('location', [0, 0])[1]
+        event_duration = payload.get('duration', None)
+        event_out = payload.get("out", None)
+        event_under_pressure = payload.get("under_pressure", None)
+        event_off_camera = payload.get("off_camera", None)
+        event_statsbomb_xg = shot_payload.get('statsbomb_xg')
+        end_location_x = shot_payload.get('end_location', [0, 0, 0])[0]
+        end_location_y = shot_payload.get('end_location', [0, 0, 0])[1]
+        event_first_time = shot_payload.get('first_time')
+        # TODO: Add more fields
+
+        upsertPayload = {
             "event_id": event_id,
             "event_player_id": player_id,
             "event_player_name": event_player_name,
             "event_statsbomb_xg": event_statsbomb_xg,
             "event_first_time": event_first_time,
             "event_competition_id": competition_id,
-            "event_season_id": season_id
+            "event_season_id": season_id,
+            "event_position": event_position,
+            "event_team_id": event_team_id,
+            "event_team_name": event_team_name,
+            "event_location_x": event_location_x,
+            "event_location_y": event_location_y,
+            "event_duration": event_duration,
+            "event_out": event_out,
+            "event_under_pressure": event_under_pressure,
+            "event_off_camera": event_off_camera,
+            "end_location_x": end_location_x,
+            "end_location_y": end_location_y
+            
         }
-        cols = list(payload.keys())
-        vals = list(payload.values())
+        cols = list(upsertPayload.keys())
+        vals = list(upsertPayload.values())
         insert_or_ignore(cursor, 'event_shot', cols,vals)
