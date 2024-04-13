@@ -246,10 +246,10 @@ def Q_4(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-     Select team_name, COUNT(team_name) as total_passes from 
+     Select event_pass.team_name, COUNT(team_name) as total_passes from 
         event_pass where 
         event_pass.event_season_id = 90 and event_pass.event_competition_id=11
-        GROUP BY team_id
+        GROUP BY team_name
         ORDER BY total_passes DESC
      """
 
@@ -434,7 +434,7 @@ def run_queries(cursor, conn, dbname):
 
     execution_time = [0,0,0,0,0,0,0,0,0,0]
 
-    # conn = Q_1(cursor, conn, execution_time)
+    conn = Q_1(cursor, conn, execution_time)
     # conn = Q_2(cursor, conn, execution_time)
     # conn = Q_3(cursor, conn, execution_time)
     conn = Q_4(cursor, conn, execution_time)
