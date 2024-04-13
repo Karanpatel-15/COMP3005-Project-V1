@@ -20,7 +20,7 @@ class EventStrategyManager:
             Error.id: Error.Strategy(),
             Duel.id: Duel.Strategy(),
             # FoulCommitted.id: FoulCommitted.Strategy(),
-            FoulWon.id: FoulWon.Strategy(),
+            # FoulWon.id: FoulWon.Strategy(),
             # FreezeFrame.id: FreezeFrame.Strategy(),
             # Goalkeeper.id: Goalkeeper.Strategy(),
             # HalfEnd.id: HalfEnd.Strategy(),

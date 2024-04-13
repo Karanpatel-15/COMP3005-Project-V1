@@ -118,7 +118,7 @@ def get_time(cursor, conn, sql_query):
         
         # Convert the output tuples to a single string
         explain_text = "\n".join([row[0] for row in explain_output])
-        
+        print(explain_text)
         # Use regular expression to find the execution time
         # Look for the pattern "Execution Time: <time> ms"
         match = re.search(r"Execution Time: ([\d.]+) ms", explain_text)
@@ -169,12 +169,11 @@ def Q_1(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
 
     query = """
-        SELECT player_name, AVG(event_statsbomb_xg) as avg_xg
-        FROM competition_season_event_mapping AS SEM
-        JOIN event_shot ON SEM.event_id = event_shot.event_id
-        JOIN player ON player.player_id = event_shot.event_player_id
-        WHERE SEM.season_id = 90 and SEM.competition_id = 11 and event_shot.event_statsbomb_xg > 0
-        GROUP BY player_name
+        SELECT event_player_name, AVG(event_statsbomb_xg) as avg_xg
+        FROM event_shot 
+        WHERE event_shot.event_season_id = 90 and event_shot.event_competition_id = 11 
+		and event_shot.event_statsbomb_xg > 0
+        GROUP BY event_player_name
         ORDER BY avg_xg DESC 
     """
 
@@ -196,12 +195,11 @@ def Q_2(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
 
     query = """
-         SELECT player_name, COUNT(SEM.event_id) as number_shots
-      FROM competition_season_event_mapping AS SEM
-      JOIN event_shot ON SEM.event_id = event_shot.event_id
-      JOIN player ON player.player_id = event_shot.event_player_id
-      WHERE SEM.season_id = 90 and SEM.competition_id = 11 and event_shot.event_statsbomb_xg > 0
-      GROUP BY player_name
+      SELECT event_player_name, COUNT(event_id) as number_shots
+      FROM event_shot
+      WHERE event_shot.event_season_id = 90 and event_shot.event_competition_id = 11
+	  and event_shot.event_statsbomb_xg > 0
+      GROUP BY event_player_name
       ORDER BY number_shots DESC
      """
 
@@ -223,17 +221,12 @@ def Q_3(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-       SELECT 
-        p.player_name, 
-        COUNT(es.event_id) AS first_time_shots
-    FROM competition_season_event_mapping AS sem
-    JOIN event_shot AS es ON sem.event_id = es.event_id
-    JOIN player AS p ON p.player_id = es.event_player_id
-    WHERE sem.season_id IN (90,42,4) and sem.competition_id=11
-    and es.event_first_time = true
-    GROUP BY p.player_name
-    HAVING COUNT(es.event_id) >= 1
-    ORDER BY first_time_shots DESC;
+         SELECT event_player_name, COUNT(event_id) AS first_time_shots 
+	        FROM event_shot 
+	        WHERE event_season_id IN (90,42,4) and event_competition_id=11 and event_first_time = true
+            GROUP BY event_player_name
+            HAVING COUNT(event_id) >= 1
+            ORDER BY first_time_shots DESC;
      """
 
     #==========================================================================
@@ -444,16 +437,16 @@ def run_queries(cursor, conn, dbname):
 
     execution_time = [0,0,0,0,0,0,0,0,0,0]
 
-    conn = Q_1(cursor, conn, execution_time)
-    conn = Q_2(cursor, conn, execution_time)
+    # conn = Q_1(cursor, conn, execution_time)
+    # conn = Q_2(cursor, conn, execution_time)
     conn = Q_3(cursor, conn, execution_time)
-    conn = Q_4(cursor, conn, execution_time)
-    conn = Q_5(cursor, conn, execution_time)
-    conn = Q_6(cursor, conn, execution_time)
-    conn = Q_7(cursor, conn, execution_time)
-    conn = Q_8(cursor, conn, execution_time)
-    conn = Q_9(cursor, conn, execution_time)
-    conn = Q_10(cursor, conn, execution_time)
+    # conn = Q_4(cursor, conn, execution_time)
+    # conn = Q_5(cursor, conn, execution_time)
+    # conn = Q_6(cursor, conn, execution_time)
+    # conn = Q_7(cursor, conn, execution_time)
+    # conn = Q_8(cursor, conn, execution_time)
+    # conn = Q_9(cursor, conn, execution_time)
+    # conn = Q_10(cursor, conn, execution_time)
 
     for i in range(10):
         print(execution_time[i])

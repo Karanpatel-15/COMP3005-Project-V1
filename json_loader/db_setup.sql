@@ -643,6 +643,9 @@ CREATE TABLE IF NOT EXISTS freeze_frame (
 CREATE TABLE IF NOT EXISTS event_shot (
     event_id UUID,
     event_player_id INTEGER,
+    event_player_name VARCHAR(100),
+    event_season_id INTEGER,
+    event_competition_id INTEGER,
     event_position VARCHAR(100),
     event_team_id INTEGER,
     event_location_x FLOAT,
@@ -710,3 +713,8 @@ CREATE TABLE IF NOT EXISTS event_tactical_shift (
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     UNIQUE (event_id)
 );
+
+
+-- INDEXES
+CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON competition_season USING hash(event_season_id);
+
