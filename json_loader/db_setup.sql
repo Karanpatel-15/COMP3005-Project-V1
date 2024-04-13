@@ -700,7 +700,6 @@ CREATE TABLE IF NOT EXISTS event_shot (
     UNIQUE (event_id)   
 );
 
---not sure about this about line up
 CREATE TABLE IF NOT EXISTS event_startingXI (
     event_id UUID,
     event_player INTEGER,
