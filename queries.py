@@ -270,11 +270,10 @@ def Q_5(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """
-       Select P.player_name,  COUNT(EP.event_recipient_id) as count_intended_recipient from competition_season_event_mapping AS SEM 
-    JOIN event_pass as EP on sem.event_id = EP.event_id
-    JOIN player AS P ON P.player_id = EP.event_recipient_id
-    WHERE SEM.season_id =44 and sem.competition_id=2
-	GROUP BY(P.player_name)  
+       Select event_pass.event_recipient_name,  COUNT(event_pass.event_recipient_name) as count_intended_recipient 
+    from event_pass 
+	where event_season_id = 44 and event_competition_id = 2
+	GROUP BY(event_pass.event_recipient_name)  
     ORDER BY count_intended_recipient DESC
      """
 
@@ -437,8 +436,8 @@ def run_queries(cursor, conn, dbname):
     conn = Q_1(cursor, conn, execution_time)
     # conn = Q_2(cursor, conn, execution_time)
     # conn = Q_3(cursor, conn, execution_time)
-    conn = Q_4(cursor, conn, execution_time)
-    # conn = Q_5(cursor, conn, execution_time)
+    # conn = Q_4(cursor, conn, execution_time)
+    conn = Q_5(cursor, conn, execution_time)
     # conn = Q_6(cursor, conn, execution_time)
     # conn = Q_7(cursor, conn, execution_time)
     # conn = Q_8(cursor, conn, execution_time)
