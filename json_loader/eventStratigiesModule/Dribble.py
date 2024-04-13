@@ -6,8 +6,11 @@ class Strategy:
         dribble = payload.get('dribble', {})
         upsertPayload = {
         "event_id" : payload.get('id', None),
-        "event_player" : payload.get('player', None).get('id', None),
+        "event_player_id" : payload.get('player', None).get('id', None),
+        "event_player_name": payload.get('player', {}).get('name', None),
         "event_location_x" : payload.get('location', [None, None])[0],
+        "event_competition_id" : payload.get('competition_id', None),
+        "event_season_id" : payload.get('season_id', None),
         "event_location_y" : payload.get('location', [None, None])[1],
         "event_position" : payload.get('position', {}).get('name', None),
         "event_duration" : payload.get('duration', None),
