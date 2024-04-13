@@ -406,7 +406,7 @@ CREATE TABLE IF NOT EXISTS event_foul_won (
     event_penalty BOOLEAN,
     event_defensive BOOLEAN,
     event_advantage BOOLEAN,
-    off_camera BOOLEAN,
+    event_off_camera BOOLEAN,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     FOREIGN KEY (event_player) REFERENCES player(player_id),
     UNIQUE (event_id)
@@ -476,8 +476,9 @@ CREATE TABLE IF NOT EXISTS event_interception (
     event_duration FLOAT,
     event_interception_outcome VARCHAR(100),
     event_counterpress BOOLEAN,
-    off_camera BOOLEAN,
-    under_pressure BOOLEAN,
+    event_off_camera BOOLEAN,
+    event_outcome VARCHAR(100),
+    event_under_pressure BOOLEAN,
     FOREIGN KEY (event_id) REFERENCES event(event_id),
     FOREIGN KEY (event_player) REFERENCES player(player_id),
     UNIQUE (event_id)

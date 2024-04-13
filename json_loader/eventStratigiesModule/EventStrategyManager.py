@@ -1,10 +1,10 @@
 from eventStratigiesModule import Error, Dribble, DribblePast, Shot, FoulCommitted
 from eventStratigiesModule import Pass, BadBehaviour, BallReceipt, BallRecovery
 from eventStratigiesModule import Block, Carry, Clearance, Dispossessed, Duel
-from eventStratigiesModule import Error, FoulCommitted, FoulWon, FreezeFrame, Goalkeeper
+from eventStratigiesModule import Error, FoulCommitted, FoulWon, FreezeFrame
 from eventStratigiesModule import HalfEnd, HalfStart, InjuryStoppage, Interception, Miscontrol
-from eventStratigiesModule import Offside, OwnGoalAgainst, OwnGoalFor, PlayerOff, PlayerOn
-from eventStratigiesModule import Pressure, RefereeBallDrop, Shield, StartingXI, Substitution, TacticalShift
+from eventStratigiesModule import PlayerOff, PlayerOn
+from eventStratigiesModule import Pressure, RefereeBallDrop, Shield#, StartingXI, Substitution, TacticalShift
 class EventStrategyManager:
     def __init__(self):
         self._strategies = {
@@ -20,22 +20,20 @@ class EventStrategyManager:
             Error.id: Error.Strategy(),
             Duel.id: Duel.Strategy(),
             # FoulCommitted.id: FoulCommitted.Strategy(),
-            # FoulWon.id: FoulWon.Strategy(),
+            FoulWon.id: FoulWon.Strategy(),
             # FreezeFrame.id: FreezeFrame.Strategy(),
-            # Goalkeeper.id: Goalkeeper.Strategy(),
-            # HalfEnd.id: HalfEnd.Strategy(),
-            # HalfStart.id: HalfStart.Strategy(),
-            # InjuryStoppage.id: InjuryStoppage.Strategy(),
-            # Interception.id: Interception.Strategy(),
-            # Miscontrol.id: Miscontrol.Strategy(),
-            # Offside.id: Offside.Strategy(),
+            HalfEnd.id: HalfEnd.Strategy(),
+            HalfStart.id: HalfStart.Strategy(),
+            InjuryStoppage.id: InjuryStoppage.Strategy(),
+            Interception.id: Interception.Strategy(),
+            Miscontrol.id: Miscontrol.Strategy(),
             # OwnGoalAgainst.id: OwnGoalAgainst.Strategy(),
             # OwnGoalFor.id: OwnGoalFor.Strategy(),
-            # PlayerOff.id: PlayerOff.Strategy(),
-            # PlayerOn.id: PlayerOn.Strategy(),
-            # Pressure.id: Pressure.Strategy(),
-            # RefereeBallDrop.id: RefereeBallDrop.Strategy(),
-            # Shield.id: Shield.Strategy(),
+            PlayerOff.id: PlayerOff.Strategy(),
+            PlayerOn.id: PlayerOn.Strategy(),
+            Pressure.id: Pressure.Strategy(),
+            RefereeBallDrop.id: RefereeBallDrop.Strategy(),
+            Shield.id: Shield.Strategy(),
             # StartingXI.id: StartingXI.Strategy(),
             # Substitution.id: Substitution.Strategy(),
             # TacticalShift.id: TacticalShift.Strategy(),
