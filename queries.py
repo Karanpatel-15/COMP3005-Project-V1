@@ -300,10 +300,10 @@ def Q_5(conn, execution_time):
 
     query = """
        Select event_pass.event_recipient_name,  COUNT(event_pass.event_recipient_name) as count_intended_recipient 
-    from event_pass 
-	where event_season_id = 44 and event_competition_id = 2
-	GROUP BY(event_pass.event_recipient_name)  
-    ORDER BY count_intended_recipient DESC
+        from event_pass 
+        where event_season_id = 44 and event_competition_id = 2
+        GROUP BY(event_pass.event_recipient_name)  
+        ORDER BY count_intended_recipient DESC
      """
 
     #==========================================================================

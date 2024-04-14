@@ -738,8 +738,7 @@ CREATE TABLE IF NOT EXISTS event_tactical_shift (
 -- INDEXES
 CREATE INDEX idx_event_shot_season_id ON event_shot USING btree(event_season_id, event_competition_id);
 CLUSTER event_shot USING idx_event_shot_season_id;
--- CREATE INDEX IF NOT EXISTS idx_event_shot_season_id_hash ON event_shot USING hash(event_season_id);
--- CREATE INDEX idx_event_pass_CID ON event_pass USING hash(CID_SID);
+
 CREATE INDEX idx_event_pass_SID_CID ON event_pass USING btree(event_season_id, event_competition_id);
 CLUSTER event_pass USING idx_event_pass_SID_CID;
 
@@ -748,3 +747,43 @@ CLUSTER event_pass USING idx_event_driblle_SID_CID;
 
 CREATE INDEX idx_event_dribbled_past_SID_CID ON event_dribbled_past USING btree(event_season_id, event_competition_id);
 CLUSTER event_dribbled_past USING idx_event_dribbled_past_SID_CID;
+
+-- Indexes for Q_1
+CREATE INDEX idx_event_shot_season_competition_xg ON event_shot(event_season_id, event_competition_id, event_statsbomb_xg);
+CREATE INDEX idx_event_shot_player_xg ON event_shot(event_player_name, event_statsbomb_xg);
+
+-- Indexes for Q_2
+CREATE INDEX idx_event_shot_season_competition_shots ON event_shot(event_season_id, event_competition_id, event_statsbomb_xg);
+CREATE INDEX idx_event_shot_player_shots ON event_shot(event_player_name, event_statsbomb_xg);
+
+-- Indexes for Q_3
+CREATE INDEX idx_event_shot_season_competition_first_time ON event_shot(event_season_id, event_competition_id, event_first_time);
+CREATE INDEX idx_event_shot_player_first_time ON event_shot(event_player_name, event_first_time);
+
+-- Indexes for Q_4
+CREATE INDEX idx_event_pass_season_competition ON event_pass(event_season_id, event_competition_id, event_team_name);
+CREATE INDEX idx_event_pass_team_name ON event_pass(event_team_name);
+
+-- Indexes for Q_5
+CREATE INDEX idx_event_pass_season_competition_recipient ON event_pass(event_season_id, event_competition_id, event_recipient_name);
+CREATE INDEX idx_event_pass_recipient_name ON event_pass(event_recipient_name);
+
+-- Indexes for Q_6
+CREATE INDEX idx_event_shot_season_competition_team_shots ON event_shot(event_season_id, event_competition_id, event_team_name);
+CREATE INDEX idx_event_shot_team_name ON event_shot(event_team_name);
+
+-- Indexes for Q_7
+CREATE INDEX idx_event_pass_season_competition_technique ON event_pass(event_season_id, event_competition_id, event_player_name, technique);
+CREATE INDEX idx_event_pass_player_name_technique ON event_pass(event_player_name, technique);
+
+-- Indexes for Q_8
+CREATE INDEX idx_event_pass_season_competition_team_technique ON event_pass(event_season_id, event_competition_id, event_team_id, technique);
+CREATE INDEX idx_event_pass_team_id_technique ON event_pass(event_team_id, technique);
+
+-- Indexes for Q_9
+CREATE INDEX idx_event_dribble_season_competition_outcome ON event_dribble(event_season_id, event_competition_id, event_outcome);
+CREATE INDEX idx_event_dribble_player_name_outcome ON event_dribble(event_player_name, event_outcome);
+
+-- Indexes for Q_10
+CREATE INDEX idx_event_dribbled_past_season_competition ON event_dribbled_past(event_season_id, event_competition_id);
+CREATE INDEX idx_event_dribbled_past_player_name ON event_dribbled_past(event_player_name);
