@@ -12,7 +12,7 @@ To run this Python console application, you need to do the following:
 pip install -r requirements.txt
 ```
 
-2. Ensure that you have a PostgreSQL database running on your local machine. And that you have a database called `postgres` with a user `postgres` and password `admin`. If you have a different setup, you can change the values in the `database.ini` file.
+2. Ensure that you have a PostgreSQL database running on your local machine. And that you have a database called `postgres` with a user `postgres` and password `1234`. If you have a different setup, you can change the values in the `database.ini` file.
 
 3. Ensure the database has the students table created. You can do this by running the following command (replace database name and user with your own if necessary) assuming you have the `psql` command line tool installed and in your path:
 
